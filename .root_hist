@@ -1,3 +1,20 @@
 first event not found
 first event not found
 .q
+TGraph t
+t
+.q
+.q
+TFile f
+f.GetListOfKeys()
+.q
+TH1D->new("a","a",2,0.,1.)->GetXaxis()
+TH1D("a","a",2,0.,1.)->GetXaxis()
+.q
+.q
+.q
+.q
+kBlack
+kRed
+kRed
+.q

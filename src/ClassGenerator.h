@@ -10,6 +10,11 @@
 #include <TRandom.h>
 #include <TApplication.h>
 #include <TBenchmark.h>
+#include <TPad.h>
+#include <TStyle.h>
+#include <TDirectory.h>
+#include <TCanvas.h>
+#include <TVirtualPad.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,6 +32,7 @@ extern "C" {
 namespace SOOT {
   /// Set up the FULL inheritance chain for the given class
   void SetupClassInheritance(pTHX_ const char* className, TClass* theClass);
+  void SetupAUTOLOAD(pTHX_ const char* className);
 
   /// Create stub for a given class. Calls SetupClassInheritance to set up the inheritance chain
   void MakeClassStub(pTHX_ const char* className);
@@ -35,7 +41,7 @@ namespace SOOT {
   void GenerateClassStubs(pTHX);
 
   void InitializeGlobals(pTHX);
-  void SetPerlGlobal(pTHX_ const char* variable, TObject* cobj, const char* className);
+  void SetPerlGlobal(pTHX_ const char* variable, TObject* cobj, const char* className = NULL);
 } // end namespace SOOT
 
 #endif

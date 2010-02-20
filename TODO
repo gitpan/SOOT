@@ -1,0 +1,39 @@
+Wrapper / guts:
+- Implement global function wrapping
+- Implement method caching
+- Implement can()
+- Fix Color_t lookup and other primitive types
+- Implement casting
+- Investigate wrapping all/more enums
+- Investigate array conversion vs. memory
+- Investigate references
+- Implement TTree/Branch (arguments-as-return-values)
+- Implement TList? / TFile::GetListOfKeys? => see examples/Basic/bill.pl 
+- Assignment operators
+  => Specifically, consider "gRandom = new TRandom(...);" in C.
+     There is no equivalent in Perl beacuse "$gRandom = TRandom->new()" will
+     just overwrite the Perl object and the ROOT objects will internally
+     use the C-level gRandom which is no longer referenced by $gRandom.
+  => General solution is a proper cross-language memory
+     management / ownership setup (PyROOT?)
+  => Reasonably simple stop-gap solution would be, for example, to
+     overload CODE dereferencing for TObjects to behave as assignment operators.
+     The above C code could become: "$gRandom->(...)".
+  ====> While mostly implemented now, this still fails on the const qualifier. Doh.
+
+Packaging:
+- Investigate ROOT's build system and how SOOT could be integrated
+  without sacrificing CPAN-installation. (Specifically, investigate
+  inlining of dependencies.)
+
+Documentation / UI:
+- Convert more examples and fix the ensuing madness.
+- Check existing examples/ for FIXME's.
+- ROOTSYS/tutorials to comply with Rene's requirements for inclusion.
+
+Testing:
+- Much, much more testing...
+- Specifically expose more guts via SOOT::API for unit testing.
+=> joincproto and friends
+=> global variable tools
+

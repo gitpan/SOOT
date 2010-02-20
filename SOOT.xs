@@ -14,6 +14,11 @@
 #include <TApplication.h>
 #include <TRandom.h>
 #include <TBenchmark.h>
+#include <TPad.h>
+#include <TStyle.h>
+#include <TDirectory.h>
+#include <TCanvas.h>
+#include <TVirtualPad.h>
 
 // manually include headers for classes with explicit wrappers
 // rootclasses.h was auto-generated to include all ROOT headers
@@ -25,6 +30,7 @@
 #include "ClassGenerator.h"
 #include "TObjectEncapsulation.h"
 #include "ROOTResolver.h"
+#include "ClassIterator.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,6 +45,8 @@ extern "C" {
 }
 #endif
 
+#include "const-c.inc"
+
 #include <iostream>
 #include <string>
 #include <cstring>
@@ -46,6 +54,7 @@ extern "C" {
 using namespace SOOT;
 using namespace std;
 
+// Broken due to bug in perl.
 /*
 void
 AUTOLOAD(...)
@@ -80,6 +89,8 @@ MODULE = SOOT		PACKAGE = SOOT
 
 PROTOTYPES: DISABLE
 
+INCLUDE: const-xs.inc
+
 INCLUDE: XS/SOOTBOOT.xs
 
 INCLUDE: XS/SOOTAPI.xs
@@ -87,6 +98,8 @@ INCLUDE: XS/SOOTAPI.xs
 INCLUDE: XS/TObject.xs
 
 INCLUDE: rootclasses.xsinclude
+
+INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp XS/ClassIterator.xsp
 
 MODULE = SOOT		PACKAGE = SOOT
 
@@ -120,5 +133,17 @@ CallMethod(className, methodName, argv)
       croak("Need array reference as third argument");
     arguments = (AV*)SvRV(argv);
     RETVAL = SOOT::CallMethod(aTHX_ className, methodName, arguments);
+  OUTPUT: RETVAL
+
+SV*
+CallAssignmentOperator(className, receiver, model)
+    char* className
+    SV* receiver
+    SV* model
+  INIT:
+    STRLEN len;
+    AV* arguments;
+  CODE:
+    RETVAL = SOOT::CallAssignmentOperator(aTHX_ className, receiver, model);
   OUTPUT: RETVAL
 
