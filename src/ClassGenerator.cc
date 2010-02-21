@@ -37,17 +37,24 @@ namespace SOOT {
   void
   SetupClassInheritance(pTHX_ const char* className, TClass* theClass)
   {
-    // FIXME the base classes can be template classes. That screws up Perl pretty bad.
-    // FIXME for now, we just skip the base classes that are template classes.
+    // FIXME the base classes can be template classes. That screws up
+    //       Perl pretty badly. For now, we just skip the base classes that are template classes.
+    // FIXME We don't make the TH* classes descendants of the TArray classes for now because
+    //       the TArray classes have overridden (XSP!) constructors. We want the autloading
+    //       to kick in for the TH* classes. This needs some consideration and a more general
+    //       solution.
     ostringstream str;
     str << className << "::ISA";
     AV* isa = get_av(str.str().c_str(), 1);
     av_clear(isa);
     TIter next(theClass->GetListOfBases());
     TBaseClass* base;
+    bool isTH1 = theClass->InheritsFrom("TH1");
     while ((base = (TBaseClass*)next())) {
       TString name(base->GetName());
-      if (!name.Contains("<")) { // skip template classes. FIXME optimize
+      if (!name.Contains("<")
+          && (!isTH1 || !name.BeginsWith("TArray")))
+      { // skip template classes. FIXME optimize
         av_push(isa, newSVpv(base->GetName(), 0));
       }
     }
@@ -84,10 +91,11 @@ namespace SOOT {
     SetPerlGlobal(aTHX_ "SOOT::gSystem", gSystem);
     SetPerlGlobal(aTHX_ "SOOT::gRandom", gRandom);
     SetPerlGlobal(aTHX_ "SOOT::gROOT", gROOT);
-    //SetPerlGlobal(aTHX_ "SOOT::gBenchmark", gBenchmark); // FIXME gBenchmark crashes
     SetPerlGlobal(aTHX_ "SOOT::gStyle", gStyle);
     SetPerlGlobal(aTHX_ "SOOT::gDirectory", gDirectory);
-    //SetPerlGlobal(aTHX_ "SOOT::gPad", gPad); // gPad NULL at this time...
+    SetPerlGlobalDelayedInit(aTHX_ "SOOT::gPad", (TObject**)&gPad, "TVirtualPad"); // gPad NULL at this time!
+    // Initialized again in SOOT.pm to band-aid a SEGV:
+    SetPerlGlobalDelayedInit(aTHX_ "SOOT::gBenchmark", (TObject**)&gBenchmark, "TBenchmark");
   }
 
 
@@ -98,6 +106,16 @@ namespace SOOT {
     sv_setsv(global,
              sv_2mortal(SOOT::EncapsulateObject(aTHX_ cobj,
                                                 (className==NULL ? cobj->ClassName() : className))));
+    global = get_sv(variable, 1); // FIXME this silences the "used only once" warning, but it is a awful solution
+    SOOT::PreventDestruction(aTHX_ global);
+  }
+
+  void
+  SetPerlGlobalDelayedInit(pTHX_ const char* variable, TObject** cobj, const char* className)
+  {
+    SV* global = get_sv(variable, 1);
+    SV* obj = sv_2mortal(SOOT::MakeDelayedInitObject(aTHX_ cobj, className));
+    sv_setsv(global, obj);
     global = get_sv(variable, 1); // FIXME this silences the "used only once" warning, but it is a awful solution
     SOOT::PreventDestruction(aTHX_ global);
   }

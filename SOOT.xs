@@ -19,6 +19,7 @@
 #include <TDirectory.h>
 #include <TCanvas.h>
 #include <TVirtualPad.h>
+#include <TPad.h>
 
 // manually include headers for classes with explicit wrappers
 // rootclasses.h was auto-generated to include all ROOT headers
@@ -144,6 +145,7 @@ CallAssignmentOperator(className, receiver, model)
     STRLEN len;
     AV* arguments;
   CODE:
+    croak("CallAssignmentOperator not implemented correctly");
     RETVAL = SOOT::CallAssignmentOperator(aTHX_ className, receiver, model);
   OUTPUT: RETVAL
 
