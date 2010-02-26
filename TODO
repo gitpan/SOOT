@@ -4,9 +4,7 @@ Wrapper / guts:
 - Implement can()
 - Fix Color_t lookup and other primitive types
   (Note: I might have fixed this by accident. SetLineColor(int) now works. Does GetLineColor?)
-- Implement casting
 - Investigate wrapping all/more enums
-- Investigate array conversion vs. memory (perl->C seems okay. Check C->perl)
 - Investigate references
 - Implement TTree/Branch (arguments-as-return-values)
 - Implement TList? / TFile::GetListOfKeys? => see examples/Basic/bill.pl 
@@ -21,17 +19,18 @@ Wrapper / guts:
      overload CODE dereferencing for TObjects to behave as assignment operators.
      The above C code could become: "$gRandom->(...)".
   ====> While mostly implemented now, this still fails on the const qualifier. Doh.
-- Auto-convert TArrayD argument types to Double_t*'s on demand
-  (same for other TArray*)
+- Either lose the silly overloading or add string overloading to get the refaddr
 
 Packaging:
 - Investigate ROOT's build system and how SOOT could be integrated
   without sacrificing CPAN-installation. (Specifically, investigate
   inlining of dependencies.)
+  => Inline dependencies (Done)
+  => Make inlined dependencies work! (Probably takes a conversion to
+     Module::Build!)
 
 Documentation / UI:
 - Convert more examples and fix the ensuing madness.
-- Auto-Convert examples/ to POD?
 - Check existing examples/ for FIXME's.
 - ROOTSYS/tutorials to comply with Rene's requirements for inclusion.
 - Document the SOOT <-> ROOT differences

@@ -1,25 +1,6 @@
 
-/* must load polluting ROOT stuff veeery early due to pollution */
-#undef Copy
-
-#include <TROOT.h>
-#include <TClass.h>
-#include <TMethod.h>
-#include <Reflex/Scope.h>
-#include <CallFunc.h>
-#include <Class.h>
-#include <TBaseClass.h>
-#include <TList.h>
-#include <TSystem.h>
-#include <TApplication.h>
-#include <TRandom.h>
-#include <TBenchmark.h>
-#include <TPad.h>
-#include <TStyle.h>
-#include <TDirectory.h>
-#include <TCanvas.h>
-#include <TVirtualPad.h>
-#include <TPad.h>
+/* must load ROOT stuff veeery early due to pollution */
+#include "ROOTIncludes.h"
 
 // manually include headers for classes with explicit wrappers
 // rootclasses.h was auto-generated to include all ROOT headers
@@ -32,6 +13,7 @@
 #include "TObjectEncapsulation.h"
 #include "ROOTResolver.h"
 #include "ClassIterator.h"
+#include "PtrTable.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,13 +32,14 @@ extern "C" {
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include <cstring>
 
 using namespace SOOT;
 using namespace std;
 
-// Broken due to bug in perl.
 /*
+// Broken due to bug in perl.
 void
 AUTOLOAD(...)
   PPCODE:
@@ -136,6 +119,7 @@ CallMethod(className, methodName, argv)
     RETVAL = SOOT::CallMethod(aTHX_ className, methodName, arguments);
   OUTPUT: RETVAL
 
+
 SV*
 CallAssignmentOperator(className, receiver, model)
     char* className
@@ -148,4 +132,26 @@ CallAssignmentOperator(className, receiver, model)
     croak("CallAssignmentOperator not implemented correctly");
     RETVAL = SOOT::CallAssignmentOperator(aTHX_ className, receiver, model);
   OUTPUT: RETVAL
+
+
+SV*
+GenerateROOTClass(className)
+    char* className
+  CODE:
+    TClass* cl = TClass::GetClass(className);
+    if (!cl)
+      RETVAL = &PL_sv_undef;
+    else {
+      std::vector<TString> classes = SOOT::MakeClassStub(aTHX_ className, NULL);
+      // Convert vector<TString> to AV.
+      // FIXME test for leaks and make a typemap
+      AV* av = newAV();
+      RETVAL = newRV_noinc((SV*)av);
+      const unsigned int len = classes.size();
+      av_extend(av, len-1);
+      for (unsigned int i = 0; i < len; ++i)
+        av_store(av, i, newSVpv(classes[i].Data(), classes[i].Length()));
+    }
+  OUTPUT: RETVAL
+
 

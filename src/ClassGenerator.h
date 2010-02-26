@@ -2,19 +2,7 @@
 #ifndef __ClassGenerator_h_
 #define __ClassGenerator_h_
 
-#include <TBaseClass.h>
-#include <TClass.h>
-#include <TList.h>
-#include <TROOT.h>
-#include <TSystem.h>
-#include <TRandom.h>
-#include <TApplication.h>
-#include <TBenchmark.h>
-#include <TPad.h>
-#include <TStyle.h>
-#include <TDirectory.h>
-#include <TCanvas.h>
-#include <TVirtualPad.h>
+#include "ROOTIncludes.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,19 +17,22 @@ extern "C" {
 }
 #endif
 
+#include <vector>
+#include <TString.h>
+
 namespace SOOT {
-  /// Set up the FULL inheritance chain for the given class
-  void SetupClassInheritance(pTHX_ const char* className, TClass* theClass);
+  /// Set up the FULL inheritance chain for the given class; Returns an array of all created classes
+  std::vector<TString> SetupClassInheritance(pTHX_ const char* className, TClass* theClass);
   void SetupAUTOLOAD(pTHX_ const char* className);
 
   /// Create stub for a given class. Calls SetupClassInheritance to set up the inheritance chain
-  void MakeClassStub(pTHX_ const char* className);
+  std::vector<TString> MakeClassStub(pTHX_ const char* className, TClass* theClass);
 
   /// Iterates over all known classes (cf. buildtools/ in SOOT) and calls MakeClassStub
   void GenerateClassStubs(pTHX);
 
   /// Initializes a bunch of globals such as gROOT, etc
-  void InitializeGlobals(pTHX);
+  void InitializePerlGlobals(pTHX);
 
   /** Fetches the given perl global variable and creates a new object holding
    *  the given TObject. The global is made magical with the PreventDestruction

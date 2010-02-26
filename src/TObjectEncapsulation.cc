@@ -9,26 +9,10 @@
 using namespace SOOT;
 using namespace std;
 
+#include "PtrTable.h"
+
 namespace SOOT {
-
-  // Inspired by XS::Variable::Magic
-  MGVTBL gNullMagicVTable = {
-      NULL, /* get */
-      NULL, /* set */
-      NULL, /* len */
-      NULL, /* clear */
-      NULL, /* free */
-#if MGf_COPY
-      NULL, /* copy */
-#endif /* MGf_COPY */
-#if MGf_DUP
-      NULL, /* dup */
-#endif /* MGf_DUP */
-#if MGf_LOCAL
-      NULL, /* local */
-#endif /* MGf_LOCAL */
-  };
-
+  PtrTable* gSOOTObjects = NULL;
 
   // Inspired by XS::Variable::Magic
   MGVTBL gDelayedInitMagicVTable= {
@@ -50,79 +34,121 @@ namespace SOOT {
 
 
   SV*
-  EncapsulateObject(pTHX_ TObject* theROOTObject, const char* className)
+  RegisterObject(pTHX_ TObject* theROOTObject, const char* className, SV* theReference)
   {
-    SV* ref = newSV(0);
-    sv_setref_pv(ref, className, (void*)theROOTObject );
-    // Not necessary?
-    //theROOTObject->SetBit(kMustCleanup);
-    return ref;
-  }
+    if (className == NULL)
+      className = theROOTObject->ClassName();
 
+    // Fetch the reference pad for this TObject
+    PtrAnnotation* refPad = gSOOTObjects->FetchOrCreate(theROOTObject);
 
-  TObject*
-  LobotomizeObject(pTHX_ SV* thePerlObject, char*& className)
-  {
-    DoDelayedInit(aTHX_ thePerlObject);
-    SV* inner = (SV*)SvRV(thePerlObject);
-    className = (char*)sv_reftype(inner, TRUE);
-    return INT2PTR(TObject*, SvIV(inner));
-  }
+    ++(refPad->fNReferences);
 
+    if (theReference == NULL)
+      theReference = newSV(0);
 
-  TObject*
-  LobotomizeObject(pTHX_ SV* thePerlObject)
-  {
-    DoDelayedInit(aTHX_ thePerlObject);
-    SV* inner = (SV*)SvRV(thePerlObject);
-    return INT2PTR(TObject*, SvIV(inner));
+    sv_setref_pv(theReference, className, (void*)theROOTObject );
+    // This was done for std::list
+    //(refPad->fPerlObjects).push_back(theReference);
+    (refPad->fPerlObjects).insert(theReference);
+
+    theROOTObject->SetBit(kMustCleanup);
+
+    return theReference;
   }
 
 
   void
-  ClearObject(pTHX_ SV* thePerlObject)
+  UnregisterObject(pTHX_ SV* thePerlObject, bool mustNotClearRefPad)
   {
-    if (SvROK(thePerlObject)) {
-      SV* inner = (SV*)SvRV(thePerlObject);
-      if (SvIOK(inner) && !IsIndestructible(aTHX_ inner)) {
-        TObject* obj = INT2PTR(TObject*, SvIV(inner));
+    if (!SvROK(thePerlObject))
+      return;
+    SV* inner = (SV*)SvRV(thePerlObject);
+    if (!SvIOK(inner))
+      return;
+    //DoDelayedInit(aTHX_ thePerlObject); // FIXME not necessary?
+    TObject* obj = INT2PTR(TObject*, SvIV(inner));
+    if (obj == NULL)
+      return;
+    
+    // It's global destruction
+    if (SOOT::gSOOTObjects == NULL) {
+      return;
+    }
+
+    // Fetch the reference pad for this TObject
+    PtrAnnotation* refPad = gSOOTObjects->Fetch(obj);
+    if (!refPad)
+      return;
+
+    --(refPad->fNReferences);
+    (refPad->fPerlObjects).erase(thePerlObject); // nuke the SV* in the set
+    sv_setiv(inner, 0);
+
+    // FIXME doesn't work / isn't necessary?
+    //sv_setsv_nomg(thePerlObject, &PL_sv_undef);
+
+    if (refPad->fNReferences == 0) {
+      bool doNotDestroyTObj = refPad->fDoNotDestroy;
+      gSOOTObjects->Delete(obj); // also frees refPad if necessary!
+      if (!doNotDestroyTObj) {
+      //if (!refPad->fDoNotDestroy && obj->TestBit(kCanDelete)) {
         //gDirectory->Remove(obj); // TODO investigate Remove vs. RecursiveRemove -- Investigate necessity, too.
+        //obj->SetBit(kMustCleanup);
         delete obj;
-        sv_setiv(inner, 0);
       }
     }
+
+    return;
   }
+
+
+  /*  ... YAGNI ...
+  void
+  CastObject(pTHX_ SV* thePerlObject, const char* newType)
+  {
+    sv_bless(thePerlObject, gv_stashpv(newType, GV_ADD));
+  }
+  */
+
 
   void
   PreventDestruction(pTHX_ SV* thePerlObject) {
     if (SvROK(thePerlObject) && SvIOK((SV*)SvRV(thePerlObject))) {
-      sv_magicext(SvRV(thePerlObject), NULL, PERL_MAGIC_ext, &gNullMagicVTable, 0, 0 );
-    }
-    else {
-      croak("bad");
-    }
+      SV* inner = (SV*)SvRV(thePerlObject);
+      TObject* ptr = INT2PTR(TObject*, SvIV(inner));
+      PtrAnnotation* refPad = gSOOTObjects->Fetch(ptr);
+      if (ptr == NULL || refPad == NULL) {
+        // late intialization always prevents destruction
+        return;
+      }
+      else {
+        // Normal encapsulated TObject
+        refPad->fDoNotDestroy = true;
+      }
+    } // end if it's a good object
+    else
+      croak("BAD");
   }
 
-  inline bool
-  IsIndestructible(pTHX_ SV* derefPObj) {
-    // My hat goes off to XS::Variable::Magic.
-    // Essentially, we just check whether the attached magic is *exactly* the type
-    // (and value, we use gNullMagicVTable as an identifier) of our destruction-prevention
-    // magic.
-    MAGIC *mg;
-    if (SvTYPE(derefPObj) >= SVt_PVMG) {
-      for (mg = SvMAGIC(derefPObj); mg; mg = mg->mg_moremagic) {
-        if (
-            (mg->mg_type == PERL_MAGIC_ext)
-            &&
-            (mg->mg_virtual == &gNullMagicVTable)
-        ) {
-          return true;
-        }
-      }
-    }
 
-    return false;
+  void
+  MarkForDestruction(pTHX_ SV* thePerlObject) {
+    if (SvROK(thePerlObject) && SvIOK((SV*)SvRV(thePerlObject))) {
+      SV* inner = (SV*)SvRV(thePerlObject);
+      TObject* ptr = INT2PTR(TObject*, SvIV(inner));
+      PtrAnnotation* refPad = gSOOTObjects->Fetch(ptr);
+      if (ptr == NULL || refPad == NULL) {
+        // late intialization always prevents destruction
+        return;
+      }
+      else {
+        // Normal encapsulated TObject
+        refPad->fDoNotDestroy = false;
+      }
+    } // end if it's a good object
+    else
+      croak("BAD");
   }
 
 
@@ -135,31 +161,48 @@ namespace SOOT {
   }
 
 
-  inline void
+  void
   DoDelayedInit(pTHX_ SV* thePerlObj) {
     // My hat goes off to XS::Variable::Magic.
     // Essentially, we just check whether the attached magic is *exactly* the type
-    // (and value, we use g as an identifier) of our destruction-prevention
+    // (and value, we use g as an identifier) of our delayed-init
     // magic.
     SV* derefPObj = SvRV(thePerlObj);
     MAGIC *mg;
     if (SvTYPE(derefPObj) >= SVt_PVMG) {
-      bool isIndestructible = false;
       for (mg = SvMAGIC(derefPObj); mg; mg = mg->mg_moremagic) {
         if ((mg->mg_type == PERL_MAGIC_ext)) {
-          if (mg->mg_virtual == &gNullMagicVTable) {
-            isIndestructible = true;
-          }
-          else if (mg->mg_virtual == &gDelayedInitMagicVTable) {
+          if (mg->mg_virtual == &gDelayedInitMagicVTable) {
             TObject* ptr = *INT2PTR(TObject**, SvIV(derefPObj));
-            sv_setpviv(derefPObj, PTR2IV(ptr));
             sv_unmagic(derefPObj, PERL_MAGIC_ext);
-            if (isIndestructible)
-              sv_magicext(derefPObj, NULL, PERL_MAGIC_ext, &gNullMagicVTable, 0, 0 ); // Same as PreventDestruction
+            // Fetch the reference pad for this TObject and append this SV
+            PtrAnnotation* refPad = gSOOTObjects->FetchOrCreate(ptr);
+            ++(refPad->fNReferences);
+            sv_setpviv(derefPObj, PTR2IV(ptr));
+            // This was done for std::list
+            //(refPad->fPerlObjects).push_back(thePerlObj);
+            (refPad->fPerlObjects).insert(thePerlObj);
+            refPad->fDoNotDestroy = true; // can't destroy late init objects
           }
+          break;
         } // end is PERL_MAGIC_ext magic
       } // end foreach magic
     } // end if magical
+  }
+
+  void
+  TTObjectEncapsulator::RecursiveRemove(TObject* object)
+  {
+    // global destruction...
+    if (!object || !gSOOTObjects)
+      return;
+
+    //cout << "ROOT asks us to remove references to " << object << endl;
+    //cout << "It is a " << object->ClassName() << endl;
+    //gSOOTObjects->PrintStats();
+
+    // Nuke it!
+    gSOOTObjects->Delete(object);
   }
 
 } // end namespace SOOT

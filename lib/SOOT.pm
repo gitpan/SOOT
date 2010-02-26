@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp 'croak';
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use base 'Exporter';
 use SOOT::Constants;
@@ -15,8 +15,10 @@ our %EXPORT_TAGS = (
   'globals' => [ qw(
     $gApplication $gSystem $gRandom $gROOT
     $gDirectory $gStyle $gPad $gBenchmark
+    $gEnv
   ) ],
   'constants' => \@SOOT::Constants::Names,
+  'functions' => [qw( Load )],
 );
 use vars @{$EXPORT_TAGS{globals}};
 
@@ -67,8 +69,34 @@ sub _bootstrap_AUTOLOAD {
   }
 }
 
-# For some reason, the normal gBenchmark will segfault on first use.
-# Thus we reinitialize it here...
+sub Load {
+  shift if @_ and defined $_[0] and $_[0] eq 'SOOT';
+  Carp::croak("Usage: SOOT->Load(classname, classname2, ...)")
+    if not @_;
+
+  my $new = 0;
+  foreach my $class (@_) {
+    no strict 'refs';
+    next if defined ${"${class}::isROOT"};
+    my $genclasses = GenerateROOTClass($class);
+    foreach my $gclass (@{$genclasses}) {
+      next if $gclass eq 'TObject' or $gclass eq 'TArray';
+      next if defined ${"${class}::isROOT"};
+      ++$new;
+      warn $gclass;
+      if ($gclass->isa('TObject')) {
+        *{"${gclass}::AUTOLOAD"} = \&TObject::AUTOLOAD;
+      } elsif ($class->isa('TArray')) {
+        *{"${gclass}::AUTOLOAD"} = \&TArray::AUTOLOAD;
+      }
+    }
+  }
+  
+  return $new;
+}
+
+# For some reason, the normal gBenchmark from XS will segfault on first use.
+# Thus we initialize it here...
 use vars '$gBenchmark';
 $gBenchmark = TBenchmark->new;
 
@@ -129,6 +157,20 @@ The list of currently supported globals is:
 
   $gApplication $gSystem $gRandom $gROOT
   $gDirectory   $gStyle  $gPad    $gBenchmark
+  $gEnv
+
+The list of currently exported functions:
+
+  Load(className, className2,...)
+
+=head1 FUNCTIONS
+
+=head2 Load
+
+Loads one or more ROOT classes and their base classes into Perl.
+Virtually all ROOT classes should be loaded out of the box.
+This function is only necessary if you load additional
+shared libraries.
 
 =head1 SEE ALSO
 
