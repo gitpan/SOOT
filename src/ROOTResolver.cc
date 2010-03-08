@@ -4,12 +4,14 @@
 
 #include "PerlCTypeConversion.h"
 #include "CPerlTypeConversion.h"
-#include "SOOTClassnames.h"
 #include <string>
 #include <iostream>
 #include <sstream>
 #include <cstring>
 #include <cstdlib>
+
+#define SOOT_DEBUG 1
+#undef SOOT_DEBUG
 
 using namespace SOOT;
 using namespace std;
@@ -32,7 +34,10 @@ namespace SOOT {
   };
 
 // FIXME checking for both TObject and TArray is expensive. Do we really have to do that?
-#define IS_TOBJECT(sv) (sv_derived_from((sv), "TObject") || sv_derived_from((sv), "TArray"))
+//#define IS_TOBJECT(sv) (sv_derived_from((sv), "TObject") || sv_derived_from((sv), "TArray"))
+
+// This isn't really checking ->isa('TObject') but whether it's part of the SOOT/ROOT system
+#define IS_TOBJECT(sv) (sv_isobject((sv)) && hv_exists(SvSTASH((SV*)SvRV((sv))), "isROOT", 6))
 
   /* Lifted from autobox. My eternal gratitude goes to the
    * ever impressive Chocolateboy!
@@ -71,6 +76,9 @@ namespace SOOT {
           return eINVALID; // VSTRING
 #endif
         if (SvROK(sv)) {
+#ifdef SOOT_DEBUG
+          cout << "Svt_PV && SvROK" << endl;
+#endif
           return eREF;
         } else {
           return eSTRING;
@@ -81,12 +89,18 @@ namespace SOOT {
           return eINVALID; // VSTRING
 #endif
         if (SvROK(sv)) {
+#ifdef SOOT_DEBUG
+          cout << "Svt_PVMG && SvROK && (IS_TOBJECT(sv) ? eTOBJECT : eREF)" << endl;
+#endif
           return IS_TOBJECT(sv) ? eTOBJECT : eREF;
         } else {
           return eSTRING;
         }
       case SVt_PVLV:
         if (SvROK(sv)) {
+#ifdef SOOT_DEBUG
+          cout << "Svt_PVLV && SvROK && (IS_TOBJECT(sv) ? eTOBJECT : eREF)" << endl;
+#endif
           return IS_TOBJECT(sv) ? eTOBJECT : eREF;
         }
         else if (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T') { /* tied lvalue */
@@ -97,7 +111,9 @@ namespace SOOT {
           else
             return eSTRING;
         } else {
+#ifdef SOOT_DEBUG
           cout << "lval"<<endl;
+#endif
           return eINVALID; // LVALUE
         }
       case SVt_PVAV:
@@ -130,6 +146,10 @@ namespace SOOT {
             case SVt_PVCV:
               return eCODE;
             default:
+#ifdef SOOT_DEBUG
+              cout << "SvROK && SvRV => default ("<<SvTYPE(SvRV(sv))<< ")"<< endl;
+              do_sv_dump(0, Perl_debug_log, sv, 0, 4, false, 4);
+#endif
               return eREF;
           }
         } else {
@@ -285,8 +305,15 @@ namespace SOOT {
         ++nTObjects;
       avtypes.push_back(type);
       const char* thisCproto = CProtoFromType(aTHX_ *elem, len, type);
-      if (thisCproto == NULL)
+      if (thisCproto == NULL) {
+#ifdef SOOT_DEBUG
+        cout << "types so far: ";
+        for (unsigned int i = 0; i < cproto.size(); i++)
+          cout << cproto[i] << ",";
+        cout << endl;
+#endif
         croak("Invalid type '%s'", gBasicTypeStrings[type]);
+      }
       cproto.push_back(thisCproto);
     }
     return nTObjects;
@@ -457,7 +484,7 @@ namespace SOOT {
         croak("FIXME Array return values to be implemented");
         break;
       case eTOBJECT:
-        if (addr == NULL)
+        if ((void*)addr == NULL)
           return &PL_sv_undef;
         // FIXME this is so hideous it's not even funny
         typeStrWithoutPtr = strdup(retTypeStr);
@@ -473,9 +500,9 @@ namespace SOOT {
         if (ptr_level > 0)
           *(ptr - ptr_level) = '\0';
         retval = SOOT::RegisterObject(aTHX_ (TObject*)addr, typeStrWithoutPtr);
-        // If we're not creating a TObject via a constructor, it's likely not outs to delete
+        // If we're not creating a TObject via a constructor, it's likely not ours to delete
         if (!isConstructor)
-          SOOT::PreventDestruction(aTHX_ retval); // FIXME optimize
+          SOOT::PreventDestruction(aTHX_ (TObject*)addr);
         if (ptr_level > 0)
           *(ptr - ptr_level) = ' ';
         free(typeStrWithoutPtr);
@@ -491,6 +518,9 @@ namespace SOOT {
   SV*
   CallMethod(pTHX_ const char* className, char* methName, AV* args)
   {
+#ifdef SOOT_DEBUG
+    cout << "CallMethod: " << className << "::" << methName << endl;
+#endif
     // Determine the class...
     TClass* c = TClass::GetClass(className);
     if (c == NULL)
@@ -500,29 +530,41 @@ namespace SOOT {
     vector<BasicType> argTypes;
     vector<string> cproto;
     unsigned int nTObjects = CProtoAndTypesFromAV(aTHX_ args, argTypes, cproto);
-    if (argTypes.size() == 0)
-      croak("Bad invocation");
-
-
-    // Fetch the call receiver (object or class name)
-    SV** elem = av_fetch(args, 0, 0);
-    if (elem == 0)
-      croak("CallMethod requires at least an object or class-name");
-    SV* perlCallReceiver = *elem;
-    BasicType receiverType = argTypes[0];
-    if (receiverType != eTOBJECT && receiverType != eSTRING) {
-      croak("Trying to invoke method '%s' on variable of type '%s' is not supported",
-            methName, gBasicTypeStrings[receiverType]);
+#ifdef SOOT_DEBUG
+    { char* cp = JoinCProto(cproto);
+      cout << "Full C proto: " << (cp==NULL?"NULL":cp) << endl;
+      free(cp); }
+#endif
+    SV* perlCallReceiver;
+    BasicType receiverType;
+    if (argTypes.size() == 0) {
+      perlCallReceiver = NULL;
     }
-
+    else {
+      // Fetch the call receiver (object or class name)
+      SV** elem = av_fetch(args, 0, 0);
+      if (elem == 0)
+        croak("BAD, elem zero");
+      perlCallReceiver = *elem;
+      receiverType = argTypes[0];
+      if (receiverType != eTOBJECT && receiverType != eSTRING) {
+        //croak("Trying to invoke method '%s' on variable of type '%s' is not supported",
+        //      methName, gBasicTypeStrings[receiverType]);
+        // Assume it's a function
+        perlCallReceiver = NULL;
+      }
+    }
 
     TObject* receiver;
     G__ClassInfo theClass(className);
-    G__MethodInfo mInfo;
+    G__MethodInfo* mInfo = NULL;
     long offset;
     bool constructor = false;
 
-    if (receiverType == eSTRING) { // class method
+    if (perlCallReceiver == NULL) { // function
+      receiver = 0;
+    }
+    else if (receiverType == eSTRING) { // class method
       if (strEQ(methName, "new")) {
         // constructor
         methName = (char*)className; // no need to free since className is also a const char*
@@ -534,14 +576,13 @@ namespace SOOT {
       --nTObjects; // The invocant isn't used int FindMethodPrototype
       receiver = LobotomizeObject(aTHX_ perlCallReceiver);
     }
-    FindMethodPrototype(theClass, mInfo, methName, argTypes, cproto, offset, nTObjects);
+    FindMethodPrototype(theClass, mInfo, methName, argTypes, cproto, offset, nTObjects, (perlCallReceiver == NULL ? true : false));
 
-    if (!mInfo.IsValid() || !mInfo.Name()) {
-      CroakOnInvalidMethod(aTHX_ className, methName, c, cproto); // FIXME cproto may have been mangled by FindMethodPrototype
-    }
+    if (!mInfo->IsValid() || !mInfo->Name())
+      CroakOnInvalidCall(aTHX_ className, methName, c, cproto, false); // FIXME cproto may have been mangled by FindMethodPrototype
 
     // Determine return type
-    char* retTypeStr = constructor ? (char*)className : (char*)mInfo.Type()->TrueName();
+    char* retTypeStr = constructor ? (char*)className : (char*)mInfo->Type()->TrueName();
 /*    cout << "MINFO="<<mInfo.Name() << " " << mInfo.Title() << " " << mInfo.NArg() << " " << mInfo.FileName() << endl;
     cout << "CINFO="<<mInfo.MemberOf()->Name()<< endl;
     cout << retTypeStr << " " << mInfo.Type()->Name() << endl;
@@ -551,17 +592,17 @@ namespace SOOT {
     
     // Prepare CallFunc
     G__CallFunc theFunc;
-    theFunc.SetFunc(mInfo);
+    theFunc.SetFunc(*mInfo);
 
     vector<void*> needsCleanup;
-    SetMethodArguments(aTHX_ theFunc, args, argTypes, needsCleanup);
+    SetMethodArguments(aTHX_ theFunc, args, argTypes, needsCleanup, (perlCallReceiver == NULL ? 0 : 1));
 
     long addr;
     double addrD;
     if (retType == eFLOAT)
-      addrD = theFunc.ExecInt((void*)((long)receiver + offset));
+      addrD = theFunc.ExecDouble((void*)((long)receiver + offset));
     else
-      addr = theFunc.ExecDouble((void*)((long)receiver + offset));
+      addr = theFunc.ExecInt((void*)((long)receiver + offset));
 
     for (unsigned int i = 0; i < needsCleanup.size(); ++i)
       free(needsCleanup[i]);
@@ -572,10 +613,10 @@ namespace SOOT {
 
 
   void
-  FindMethodPrototype(G__ClassInfo& theClass, G__MethodInfo& mInfo,
+  FindMethodPrototype(G__ClassInfo& theClass, G__MethodInfo*& mInfo,
                       const char* methName, std::vector<BasicType>& proto,
                       std::vector<std::string>& cproto, long int& offset,
-                      const unsigned int nTObjects)
+                      const unsigned int nTObjects, bool isFunction)
 
   {
     // This comes practically verbatim from RubyROOT because of the reference map algorithm
@@ -586,31 +627,70 @@ namespace SOOT {
     unsigned int bitmap_end = static_cast<unsigned int>( 0x1 << nTObjects );
 
     // Check if method methname with prototype cproto is present in the class
-    char* cprotoStr = JoinCProto(cproto, 1);
-    mInfo = theClass.GetMethod(methName, (cprotoStr==NULL ? "" : cprotoStr), &offset);
-    free(cprotoStr);
+    char* cprotoStr = JoinCProto(cproto, (isFunction ? 0 : 1));
+    bool freeCProtoStr = true;
+    if (cprotoStr == NULL) {
+      cprotoStr = (char*)"";
+      freeCProtoStr = false;
+    }
+    if (isFunction) {
+      // FIXME AAAAAAAAAAAAAAAAAAH! This is embarrassing
+      TClass c(theClass.Name());
+      TMethod* meth = c.GetMethodWithPrototype(methName, cprotoStr);
+      if (!meth)
+        CroakOnInvalidCall(aTHX_ theClass.Name(), methName, &c, cproto, true);
+      void* ptr = meth->InterfaceMethod();
+      if (!ptr)
+        CroakOnInvalidCall(aTHX_ theClass.Name(), methName, &c, cproto, true);
+      mInfo = new G__MethodInfo(theClass);
+      bool found = false;
+      while (mInfo->Next()) {
+        if (ptr == mInfo->InterfaceMethod()) {
+          found = true;
+          break;
+        }
+      }
+      if (!found)
+        CroakOnInvalidCall(aTHX_ theClass.Name(), methName, &c, cproto, true);
+    } else {
+      mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
+    }
+    if (freeCProtoStr)
+      free(cprotoStr);
 
     /* Loop if we have to, i.e. there are T_OBJECTS ^= TObjects and the first
      * combination is not correct.
      */
-    if( nTObjects > 0 and !(mInfo.InterfaceMethod()) ) {
+    if( nTObjects > 0 and !(mInfo->InterfaceMethod()) ) {
       for( unsigned int reference_map=0x1; reference_map < bitmap_end; ++reference_map) {
         TwiddlePointersAndReferences(proto, cproto, reference_map);
-        char* cprotoStr = JoinCProto(cproto, 1);
-        mInfo = theClass.GetMethod(methName, cprotoStr, &offset);
-        free(cprotoStr);
-        if (mInfo.InterfaceMethod())
+        char* cprotoStr = JoinCProto(cproto, (isFunction ? 0 : 1));
+        bool freeCProtoStr = true;
+        if (cprotoStr == NULL) {
+          cprotoStr = (char*)"";
+          freeCProtoStr = false;
+        }
+        mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
+        if (freeCProtoStr)
+          free(cprotoStr);
+        if (mInfo->InterfaceMethod())
           break;
       }
 
       // Now with int* => double* if necessary
-      if (!(mInfo.InterfaceMethod()) && CProtoIntegerToFloat(cproto)) { // found int* => double*
+      if (!(mInfo->InterfaceMethod()) && CProtoIntegerToFloat(cproto)) { // found int* => double*
         for( unsigned int reference_map=0x1; reference_map < bitmap_end; ++reference_map) {
           TwiddlePointersAndReferences(proto, cproto, reference_map);
-          char* cprotoStr = JoinCProto(cproto, 1);
-          mInfo = theClass.GetMethod(methName, cprotoStr, &offset);
-          free(cprotoStr);
-          if (mInfo.InterfaceMethod())
+          char* cprotoStr = JoinCProto(cproto, (isFunction ? 0 : 1));
+          bool freeCProtoStr = true;
+          if (cprotoStr == NULL) {
+            cprotoStr = (char*)"";
+            freeCProtoStr = false;
+          }
+          mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
+          if (freeCProtoStr)
+            free(cprotoStr);
+          if (mInfo->InterfaceMethod())
             break;
         }
       } // end if need to try int* => double*
@@ -651,7 +731,7 @@ namespace SOOT {
 
 
   void
-  CroakOnInvalidMethod(pTHX_ const char* className, const char* methName, TClass* c, const std::vector<std::string>& cproto)
+  CroakOnInvalidCall(pTHX_ const char* className, const char* methName, TClass* c, const std::vector<std::string>& cproto, bool isFunction = false)
   {
     ostringstream msg;
     char* cprotoStr = JoinCProto(cproto);
@@ -660,19 +740,20 @@ namespace SOOT {
 
     vector<string> candidates;
     TIter next(c->GetListOfAllPublicMethods());
-    TMethod* meth;
-    while ((meth = (TMethod*)next())) {
+    TFunction* meth;
+    while ((meth = (TFunction*)next())) {
       if (strEQ(meth->GetName(), methName)) {
         candidates.push_back(string(meth->GetPrototype()));
       }
     }
 
-    msg << "Can't locate method \"" << methName << "\" via package \""
+    const char* what = (isFunction ? "function" : "method");
+    msg << "Can't locate " << what << " \"" << methName << "\" via package \""
         << className << "\". From the arguments you supplied, the following C prototype was calculated:\n  "
         << className << "::" << methName << "(" << cprotoStr << ")";
     free(cprotoStr);
     if (!candidates.empty()) {
-      msg << "\nThere were the following methods of the same name, but with a different prototype:";
+      msg << "\nThere were the following class members of the same name, but with a different prototype:";
       for (unsigned int iCand = 0; iCand < candidates.size(); ++iCand) {
         msg << "\n  " << candidates[iCand];
       }

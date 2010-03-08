@@ -1,8 +1,5 @@
-buildtools/caps
-buildtools/fullmap
 buildtools/gen_examples.pl
 buildtools/gen_root_xsp_include.pl
-buildtools/genclassnames.pl
 buildtools/genconstants.pl
 buildtools/xsubpp
 Changes
@@ -45,6 +42,19 @@ examples/Hist/quantiles.pl
 examples/Hist/seism.pl
 examples/Hist/transpad.pl
 examples/Hist/zones.pl
+examples/Math/binomial.pl
+examples/Math/FeldmanCousins.pl
+examples/Math/limit.pl
+examples/Math/mathBeta.pl
+examples/Math/mathcoreCDF.pl
+examples/Math/mathcoreSpecFunc.pl
+examples/Math/mathcoreStatFunc.pl
+examples/Math/mathGammaNormal.pl
+examples/Math/mathLaplace.pl
+examples/Math/mathStudent.pl
+examples/Math/principal.pl
+examples/Math/rolke.pl
+examples/Math/vavilov.pl
 inc/ExtUtils/Typemap.pm
 inc/inc_ExtUtils-ParseXS/ExtUtils/ParseXS.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp.pm
@@ -86,6 +96,7 @@ lib/SOOT/API.pm
 lib/SOOT/Examples/Basic.pod
 lib/SOOT/Examples/Graph.pod
 lib/SOOT/Examples/Hist.pod
+lib/SOOT/Examples/Math.pod
 lib/TArray.pm
 lib/TObject.pm
 LICENSE
@@ -100,6 +111,8 @@ ROOT_XSP/TArrayF.xsp
 ROOT_XSP/TArrayI.xsp
 ROOT_XSP/TArrayL.xsp
 ROOT_XSP/TArrayS.xsp
+ROOT_XSP/TF1.xsp
+ROOT_XSP/TFormula.xsp
 ROOT_XSP/TGraph.xsp
 ROOT_XSP/TGraphAsymmErrors.xsp
 ROOT_XSP/TGraphBentErrors.xsp
@@ -113,6 +126,7 @@ src/ClassIterator.cc
 src/ClassIterator.h
 src/CPerlTypeConversion.cc
 src/CPerlTypeConversion.h
+src/ExternalXSUBs.h
 src/Makefile.PL
 src/PerlCTypeConversion.cc
 src/PerlCTypeConversion.h
@@ -127,11 +141,11 @@ t/010boot.t
 t/020types.t
 t/025cproto.t
 t/030tarray.t
+t/035equality.t
 TODO
 typemap
 typemap.xsp
 XS/ClassIterator.xsp
-XS/SOOT.xsp
 XS/SOOTAPI.xs
 XS/SOOTBOOT.xs
 XS/TObject.xs

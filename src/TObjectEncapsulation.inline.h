@@ -27,25 +27,39 @@ namespace SOOT {
 
 
   inline void
-  ClearObject(pTHX_ SV* thePerlObject)
-  {
-    if (SvROK(thePerlObject)) {
-      SV* inner = (SV*)SvRV(thePerlObject);
-      if (SvIOK(inner) && !IsIndestructible(aTHX_ thePerlObject)) {
-        TObject* obj = INT2PTR(TObject*, SvIV(inner));
-        if (obj->TestBit(kCanDelete)) {
-          //gDirectory->Remove(obj); // TODO investigate Remove vs. RecursiveRemove -- Investigate necessity, too.
-          obj->SetBit(kMustCleanup);
-          delete obj;
-        }
-        sv_setiv(inner, 0);
-      }
+  PreventDestruction(pTHX_ TObject* theROOTObject) {
+    if (theROOTObject != NULL) {
+      PtrAnnotation* refPad = gSOOTObjects->Fetch(theROOTObject);
+      // late intialization always prevents destruction => skip
+      if (refPad != NULL) // Normal encapsulated TObject
+        refPad->fDoNotDestroy = true;
     }
   }
 
 
+  inline void
+  ClearObject(pTHX_ SV* thePerlObject)
+  {
+    if (SvROK(thePerlObject)) {
+      SV* inner = (SV*)SvRV(thePerlObject);
+      if (SvIOK(inner)) {
+        TObject* obj = INT2PTR(TObject*, SvIV(inner));
+        if (!IsIndestructible(aTHX_ obj)) {
+          if (obj->TestBit(kCanDelete)) {
+            //gDirectory->Remove(obj); // TODO investigate Remove vs. RecursiveRemove -- Investigate necessity, too.
+            obj->SetBit(kMustCleanup);
+            delete obj;
+          }
+          sv_setiv(inner, 0);
+        }
+      } // end if SvIOK
+    } // end if RVOK
+  }
+
+
   inline bool
-  IsIndestructible(pTHX_ SV* thePerlObject) {
+  IsIndestructible(pTHX_ SV* thePerlObject)
+  {
     if (SvROK(thePerlObject) && SvIOK((SV*)SvRV(thePerlObject))) {
       PtrAnnotation* refPad = gSOOTObjects->Fetch(LobotomizeObject(aTHX_ thePerlObject));
       if (!refPad)
@@ -54,6 +68,16 @@ namespace SOOT {
     }
     else
       croak("BAD");
+  }
+
+
+  inline bool
+  IsIndestructible(pTHX_ TObject* theROOTObject)
+  {
+    PtrAnnotation* refPad = gSOOTObjects->Fetch(theROOTObject);
+    if (!refPad)
+      croak("SOOT::IsIndestructible: Not an encapsulated ROOT object!");
+    return refPad->fDoNotDestroy;
   }
 
 

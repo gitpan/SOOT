@@ -308,7 +308,7 @@ This is a listing of all SOOT examples for Graph.
   $padNcUP->SetBottomMargin(0.00);
   
   my $frameNcUP = TH1F->new("frameNcUP","",100,0,$maxPlotPart);
-  $frameNcUP->GetYaxis()->SetLabelOffset(0.005); # FIXME Get?axis still returning "enum"
+  $frameNcUP->GetYaxis()->SetLabelOffset(0.005);
   $frameNcUP->GetYaxis()->SetLabelSize(0.12);
   $frameNcUP->SetMinimum($Nc_200_Min);
   $frameNcUP->SetMaximum($Nc_200_Max);
@@ -450,7 +450,7 @@ This is a listing of all SOOT examples for Graph.
   sub DrawSmooth {
      my ($can, $grin, $grout, $pad, $title, $xt, $yt) = @_;
      $can->cd($pad);
-     my $vFrame = $can->DrawFrame(0,-130,60,70); # FIXME this doesn't return a vFrame but an "enum"
+     my $vFrame = $can->DrawFrame(0,-130,60,70); # FIXME this doesn't return a vFrame but a "G__p2memfunc"
      $vFrame->SetTitle($title);
      $vFrame->SetTitleSize(0.2);
      $vFrame->SetXTitle($xt);
@@ -491,7 +491,7 @@ This is a listing of all SOOT examples for Graph.
   my $gr1 = TGraphErrors->new($n1,$x1,$y1,$ex1,$ey1);
   $gr1->SetMarkerColor(kBlue);
   $gr1->SetMarkerStyle(21);
-  $gr1->Fit("pol6","q"); # FIXME Unhandled return type 'enum' (SOOT type 'INVALID')
+  $gr1->Fit("pol6","q"); # FIXME Unhandled return type 'TFitResultPtr' (SOOT type 'INVALID')
   $mg->Add($gr1);
   
   # create second graph
@@ -511,8 +511,8 @@ This is a listing of all SOOT examples for Graph.
   
    #force drawing of canvas to generate the fit TPaveStats
   $c1->Update();
-  my $stats1 = $gr1->GetListOfFunctions()->FindObject("stats"); # FIXME the dreaded enum error...
-  my $stats2 = $gr2->GetListOfFunctions()->FindObject("stats"); # FIXME the dreaded enum error...
+  my $stats1 = $gr1->GetListOfFunctions()->FindObject("stats")->as('TPaveStats');
+  my $stats2 = $gr2->GetListOfFunctions()->FindObject("stats")->as('TPaveStats');
   $stats1->SetTextColor(kBlue); 
   $stats2->SetTextColor(kRed); 
   $stats1->SetX1NDC(0.12); $stats1->SetX2NDC(0.32); $stats1->SetY1NDC(0.75);

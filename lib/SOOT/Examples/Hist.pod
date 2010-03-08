@@ -223,7 +223,8 @@ This is a listing of all SOOT examples for Hist.
     padRefresh($c1) if $_ and $_ % kUPDATE == 0;
   }
   
-  $hpx[$_]->Fit("gaus","","") for 0..2;
+  $hpx[$_]->Fit("gaus","","") for 0..2; # FIXME Unhandled return type 'TFitResultPtr' (SOOT type 'INVALID') at /home/tsee/perl/root/soot/SOOT/blib/lib/TObject.pm line 30.
+  
   padRefresh($c1);
   
   sub padRefresh {
@@ -233,8 +234,8 @@ This is a listing of all SOOT examples for Hist.
     return if not defined $pad;
     $pad->Modified();
     $pad->Update();
-    my $tl = $pad->GetListOfPrimitives(); # FIXME This doesn't work yet (enum returned...)
-    return if not $tl;
+    my $tl = $pad->GetListOfPrimitives();
+    return if not defined $tl;
     for (my $i = 0; $i < $tl->GetSize(); $i++) {
       my $obj = $tl->At($i);
       padRefresh($obj, 1) if $obj->isa("TPad");
@@ -245,6 +246,7 @@ This is a listing of all SOOT examples for Hist.
   
   
   $gApplication->Run;
+  
 
 
 
@@ -467,6 +469,8 @@ This is a listing of all SOOT examples for Hist.
   use strict;
   use warnings;
   use SOOT ':all';
+  use threads;
+  use Time::HiRes 'usleep';
   
   my $sw = TStopwatch->new(); 
   $sw->Start();
@@ -488,20 +492,27 @@ This is a listing of all SOOT examples for Hist.
   $ht->SetMinimum(-$signal);
   $ht->SetStats(0);
   $ht->SetLineColor(2);
-  $ht->GetXaxis()->SetTimeDisplay(1); # FIXME the dreaded "enum" for GetXaxis
+  $ht->GetXaxis()->SetTimeDisplay(1);
   $ht->GetYaxis()->SetNdivisions(520);
   $ht->Draw();
      
+  my $thr = threads->new(sub {$gApplication->Run()}); #canvas can be edited during the loop
+  usleep(5000); # FIXME find better way to fix this
+  $gApplication->SetReturnFromRun(1);
+  
   for my $i (1..2299) {
     #======= Build a signal : noisy damped sine ======
     my $noise = $gRandom->Gaus(0,120);
-    $noise += $signal*sin(($i-700.)*6.28/30)*exp((700.-$i)/300.) if ($i > 700) ;
-    $ht->SetBinContent($i,1.0*$noise);
+    $noise += $signal*sin(($i-700.)*6.28/30)*exp((700.-$i)/300.) if $i > 700;
+    $ht->SetBinContent($i,$noise);
     $c1->Modified();
     $c1->Update();
-    $gSystem->ProcessEvents(); #canvas can be edited during the loop
   }
   print sprintf("Real Time = %8.3fs, Cpu Time = %8.3fs\n",$sw->RealTime(),$sw->CpuTime());
+  
+  $gApplication->Terminate();
+  $thr->join();
+  
 
 
 
@@ -536,7 +547,7 @@ This is a listing of all SOOT examples for Hist.
   
   $h1->Draw();
   $pad1->Update(); #this will force the generation of the "stats" box
-  my $ps1 = $h1->GetListOfFunctions()->FindObject("stats"); # FIXME GetListOfFunctions returns fake 'enum'
+  my $ps1 = $h1->GetListOfFunctions()->FindObject("stats")->as('TPaveStats');
   $ps1->SetX1NDC(0.4); 
   $ps1->SetX2NDC(0.6);
   $pad1->Modified();
@@ -556,7 +567,7 @@ This is a listing of all SOOT examples for Hist.
   $h2->Draw("sames");
   $pad2->Update();
   
-  my $ps2 = $h2->GetListOfFunctions()->FindObject("stats");
+  my $ps2 = $h2->GetListOfFunctions()->FindObject("stats")->as('TPaveStats');
   $ps2->SetX1NDC(0.65); 
   $ps2->SetX2NDC(0.85);
   $ps2->SetTextColor(kRed);
@@ -612,7 +623,7 @@ This is a listing of all SOOT examples for Hist.
   $pad2->SetBottomMargin(0);
   $pad2->SetTickx(2);
   $pad2->SetTicky(2);
-  $h2->GetYaxis()->SetLabelOffset(0.01); # FIXME GetYaxis returns 'enum'...
+  $h2->GetYaxis()->SetLabelOffset(0.01);
   $h2->Draw();
   
   $pad3->cd();

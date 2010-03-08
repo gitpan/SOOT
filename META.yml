@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               SOOT
-version:            0.04
+version:            0.05
 abstract:           Use ROOT from Perl
 author:
     - Steffen Mueller <smueller@cpan.org>

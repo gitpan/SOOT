@@ -65,25 +65,27 @@ namespace SOOT {
    */
   void ClearObject(pTHX_ SV* thePerlObject);
   
-  /*  ... YAGNI ...
-  /// This corresponds to a C cast "(NewType*)obj"
-  void CastObject(pTHX_ SV* thePerlObject, const char* newType);
-  */
-  
-  /// Prevents destruction of an object by noting the fact in the object table
+  /// Prevents destruction of an object by noting the fact in the object table (SV* variant ==> slow)
   void PreventDestruction(pTHX_ SV* thePerlObject);
+  /// Prevents destruction of an object by noting the fact in the object table (TObject variant ==> fast)
+  void PreventDestruction(pTHX_ TObject* theROOTObject);
 
   /// Marks a given object as destructible by Perl
   void MarkForDestruction(pTHX_ SV* thePerlObject);
 
-  /// Returns whether the TObject encapsulated in the given Perl object may be freed by SOOT
+  /// Returns whether the TObject encapsulated in the given Perl object may be freed by SOOT (SV* variant ==> slow)
   bool IsIndestructible(pTHX_ SV* thePerlObject);
+  /// Returns whether the TObject encapsulated in the given Perl object may be freed by SOOT (TObject* variant ==> fast)
+  bool IsIndestructible(pTHX_ TObject* theROOTObject);
 
   /// Creates a new Perl TObject wrapper (as with RegisterObject) that dereferences itself on first access
   SV* MakeDelayedInitObject(pTHX_ TObject** cobj, const char* className);
 
   /// Replaces the object with its C-level dereference and removes the DelayedInit magic
   void DoDelayedInit(pTHX_ SV* thePerlObject);
+
+  /// Compares to Perl objects by comparing their underlying TObjects
+  bool IsSameTObject(pTHX_ SV* perlObj1, SV* perlObj2);
 } // end namespace SOOT
 
 #include "TObjectEncapsulation.inline.h"

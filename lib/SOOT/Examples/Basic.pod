@@ -479,7 +479,7 @@ This is a listing of all SOOT examples for Basic.
      $p1->cd();
   
      # creating a view
-     my $view = TView->new(1); # FIXME doesn't work as of 2010-02-19
+     my $view = TView->new(1); # FIXME doesn't work as of 2010-03-04 (TView not available in ROOT?)
      $view->SetRange(5,5,5,25,25,25);
   
      # create a first PolyLine3D
@@ -1049,146 +1049,145 @@ This is a listing of all SOOT examples for Basic.
   use warnings;
   use SOOT ':all';
   
-  sub _geant3task {
-    my $geant3 = TTask->new("geant3","Geant3 simulation main program");      
-    $gROOT->GetListOfTasks()->Add($geant3); # FIXME check gROOT->GetListOfTasks (Can't locate object method "Add" via package "enum")
-    my $uginit = TTask->new("uginit","Initialisation manager");      
-    my $grun   = TTask->new("grun","#Run manager");      
-    my $uglast = TTask->new("uglast","Termination manager");      
-    $geant3->Add($uginit);
-    $geant3->Add($grun);
-    $geant3->Add($uglast);
-    my $ginit  = TTask->new("ginit","Geant3 initialisation");      
-    my $ugeom  = TTask->new("ugeom","Geometry initialisation manager");      
-    my $gphysi = TTask->new("gphysi","Initialise cross-sections and energy loss tables");      
-    my $ggclos = TTask->new("ggclos","Geometry analyzer and optimizer");      
-    $uginit->Add($ginit);
-    $uginit->Add($ugeom);
-    $uginit->Add($gphysi);
-    $uginit->Add($ggclos);
-    my $gtrigi = TTask->new("gtrigi","Event initialisation");      
-    my $gtrig  = TTask->new("gtrig","Event manager");      
-    my $gtrigc = TTask->new("gtrigc","Event cleaner");      
-    $grun->Add($gtrigi);
-    $grun->Add($gtrig);
-    $grun->Add($gtrigc);
-    my $glast  = TTask->new("glast","Geant3 termination");      
-    my $igend  = TTask->new("igend","Graphics package termination");      
-    $uglast->Add($glast);
-    $uglast->Add($igend);
-    my $gukine = TTask->new("gukine","Event generator manager");      
-    my $gutrev = TTask->new("gutrev","Event application manager");      
-    my $gudigi = TTask->new("gudigi","Event digitisation manager");      
-    my $guout  = TTask->new("guout","Event termination manager");      
-    $gtrig->Add($gukine);
-    $gtrig->Add($gutrev);
-    $gtrig->Add($gudigi);
-    $gtrig->Add($guout);
-    my $gtreve = TTask->new("gtreve","Geant3 event manager");      
-    $gutrev->Add($gtreve);
-    my $gltrac = TTask->new("gltrac","Initialize tracking parameters");      
-    my $gftrac = TTask->new("gftrac","select next track segment from stack JTRACK");      
-    my $gutrak = TTask->new("gutrak","Application track manager");      
-    $gtreve->Add($gltrac);
-    $gtreve->Add($gftrac);
-    $gtreve->Add($gutrak);
-    my $gtrack = TTask->new("gtrack","Geant3 track manager");      
-    $gutrak->Add($gtrack);
-    my $gtgama = TTask->new("gtgama","photon propagator");      
-    my $gtelec = TTask->new("gtelec","electron propagator");      
-    my $gtneut = TTask->new("gtneut","neutron propagator");      
-    my $gthadr = TTask->new("gthadr","hadron propagator");      
-    my $gtmuon = TTask->new("gtmuon","muon propagator");      
-    my $gtnino = TTask->new("gtnino","geantino propagator");      
-    my $gtckov = TTask->new("gtckov","Cherenkov light propagator");      
-    my $gthion = TTask->new("gthion","heavy ion propagator");      
-    my $gustep = TTask->new("gustep","Application step manager");      
-    my $gtmedi = TTask->new("gtmedi","Geometry volume finder");      
-    $gtrack->Add($gtgama);
-    $gtrack->Add($gtelec);
-    $gtrack->Add($gtneut);
-    $gtrack->Add($gthadr);
-    $gtrack->Add($gtmuon);
-    $gtrack->Add($gtnino);
-    $gtrack->Add($gtckov);
-    $gtrack->Add($gthion);
-    $gtrack->Add($gustep);
-    $gtrack->Add($gtmedi);
-    my $gtnext = TTask->new("gtnext","Geometry bounary manager");      
-    my $gpairg = TTask->new("gpairg","Generate pair production");      
-    my $gcomp  = TTask->new("gcomp","Generate Compton scattering");      
-    my $gphot  = TTask->new("gphot","Generate photo effect");      
-    my $grayl  = TTask->new("grayl","Generate Rayleigh effect");      
-    my $gpfis  = TTask->new("gpfis","Generate photo fission");      
-    $gtgama->Add($gtnext);
-    $gtgama->Add($gpairg);
-    $gtgama->Add($gcomp);
-    $gtgama->Add($gphot);
-    $gtgama->Add($grayl);
-    $gtgama->Add($gpfis);
-    my $guswim = TTask->new("guswim","magnetic field propagator");      
-    my $ggckov = TTask->new("ggckov","Generate Cherenkov photons");      
-    my $gsync  = TTask->new("gsync","Generate synchrotron radiation");      
-    my $gmults = TTask->new("gmults","Apply multiple scattering");      
-    my $gbreme = TTask->new("gbreme","Generate Bremsstrahlung");      
-    my $gdray  = TTask->new("gdray","Generate delta ray");      
-    my $ganni  = TTask->new("ganni","Generate Positron annihilation");      
-    my $gannir = TTask->new("gannir","Stopped tracks and annihilation at rest");      
-    
-    $gtelec->Add($gtnext);
-    $gtelec->Add($guswim);
-    $gtelec->Add($ggckov);
-    $gtelec->Add($gsync);
-    $gtelec->Add($gmults);
-    $gtelec->Add($gbreme);
-    $gtelec->Add($gdray);
-    $gtelec->Add($ganni);
-    $gtelec->Add($gannir);
-    my $guphad = TTask->new("guphad","Hadronic cross-section manager");      
-    my $guhadr = TTask->new("guhadr","Hadronic cascade manager");      
-    my $gdecay = TTask->new("gdecay","Particle decay");      
-    $gtneut->Add($gtnext);
-    $gtneut->Add($guphad);
-    $gtneut->Add($guhadr);
-    $gtneut->Add($gdecay);
-    
-    $gthadr->Add($gtnext);
-    $gthadr->Add($guphad);
-    $gthadr->Add($guswim);
-    $gthadr->Add($ggckov);
-    $gthadr->Add($gmults);
-    $gthadr->Add($guhadr);
-    $gthadr->Add($gdecay);
-    $gthadr->Add($gdray);
-    my $gbremm = TTask->new("gbremm","Generate Bremsstrahlung");      
-    my $gpairm = TTask->new("gpairm","Generate Pair production");      
-    my $gmunu  = TTask->new("gmunu","Generate Nuclear interaction");      
-    $gtmuon->Add($gtnext);
-    $gtmuon->Add($guswim);
-    $gtmuon->Add($ggckov);
-    $gtmuon->Add($gmults);
-    $gtmuon->Add($gbremm);
-    $gtmuon->Add($gpairm);
-    $gtmuon->Add($gdecay);
-    $gtmuon->Add($gdray);
-    $gtmuon->Add($gmunu);
-    $gtmuon->Add($gdecay);
-    
-    $gtnino->Add($gtnext);
-    my $glisur = TTask->new("glisur","Photon is reflected");      
-    $gtckov->Add($gtnext);
-    $gtckov->Add($glisur);
-    
-    $gthion->Add($gtnext);
-    $gthion->Add($guswim);
-    $gthion->Add($gmults);
-    $gthion->Add($guhadr);
-    $gthion->Add($gdray);
-    
-    TBrowser->new
-  }
+  # FIXME Error in <RootX11ErrorHandler>: BadDrawable (invalid Pixmap or Window parameter) (TGListTree XID: 60817649, XREQ: 53)
   
-  _geant3task;
+  my $geant3 = TTask->new("geant3","Geant3 simulation main program");      
+  $gROOT->GetListOfTasks()->Add($geant3);
+  my $uginit = TTask->new("uginit","Initialisation manager");      
+  my $grun   = TTask->new("grun","#Run manager");      
+  my $uglast = TTask->new("uglast","Termination manager");      
+  $geant3->Add($uginit);
+  $geant3->Add($grun);
+  $geant3->Add($uglast);
+  my $ginit  = TTask->new("ginit","Geant3 initialisation");      
+  my $ugeom  = TTask->new("ugeom","Geometry initialisation manager");      
+  my $gphysi = TTask->new("gphysi","Initialise cross-sections and energy loss tables");      
+  my $ggclos = TTask->new("ggclos","Geometry analyzer and optimizer");      
+  $uginit->Add($ginit);
+  $uginit->Add($ugeom);
+  $uginit->Add($gphysi);
+  $uginit->Add($ggclos);
+  my $gtrigi = TTask->new("gtrigi","Event initialisation");      
+  my $gtrig  = TTask->new("gtrig","Event manager");      
+  my $gtrigc = TTask->new("gtrigc","Event cleaner");      
+  $grun->Add($gtrigi);
+  $grun->Add($gtrig);
+  $grun->Add($gtrigc);
+  my $glast  = TTask->new("glast","Geant3 termination");      
+  my $igend  = TTask->new("igend","Graphics package termination");      
+  $uglast->Add($glast);
+  $uglast->Add($igend);
+  my $gukine = TTask->new("gukine","Event generator manager");      
+  my $gutrev = TTask->new("gutrev","Event application manager");      
+  my $gudigi = TTask->new("gudigi","Event digitisation manager");      
+  my $guout  = TTask->new("guout","Event termination manager");      
+  $gtrig->Add($gukine);
+  $gtrig->Add($gutrev);
+  $gtrig->Add($gudigi);
+  $gtrig->Add($guout);
+  my $gtreve = TTask->new("gtreve","Geant3 event manager");      
+  $gutrev->Add($gtreve);
+  my $gltrac = TTask->new("gltrac","Initialize tracking parameters");      
+  my $gftrac = TTask->new("gftrac","select next track segment from stack JTRACK");      
+  my $gutrak = TTask->new("gutrak","Application track manager");      
+  $gtreve->Add($gltrac);
+  $gtreve->Add($gftrac);
+  $gtreve->Add($gutrak);
+  my $gtrack = TTask->new("gtrack","Geant3 track manager");      
+  $gutrak->Add($gtrack);
+  my $gtgama = TTask->new("gtgama","photon propagator");      
+  my $gtelec = TTask->new("gtelec","electron propagator");      
+  my $gtneut = TTask->new("gtneut","neutron propagator");      
+  my $gthadr = TTask->new("gthadr","hadron propagator");      
+  my $gtmuon = TTask->new("gtmuon","muon propagator");      
+  my $gtnino = TTask->new("gtnino","geantino propagator");      
+  my $gtckov = TTask->new("gtckov","Cherenkov light propagator");      
+  my $gthion = TTask->new("gthion","heavy ion propagator");      
+  my $gustep = TTask->new("gustep","Application step manager");      
+  my $gtmedi = TTask->new("gtmedi","Geometry volume finder");      
+  $gtrack->Add($gtgama);
+  $gtrack->Add($gtelec);
+  $gtrack->Add($gtneut);
+  $gtrack->Add($gthadr);
+  $gtrack->Add($gtmuon);
+  $gtrack->Add($gtnino);
+  $gtrack->Add($gtckov);
+  $gtrack->Add($gthion);
+  $gtrack->Add($gustep);
+  $gtrack->Add($gtmedi);
+  my $gtnext = TTask->new("gtnext","Geometry bounary manager");      
+  my $gpairg = TTask->new("gpairg","Generate pair production");      
+  my $gcomp  = TTask->new("gcomp","Generate Compton scattering");      
+  my $gphot  = TTask->new("gphot","Generate photo effect");      
+  my $grayl  = TTask->new("grayl","Generate Rayleigh effect");      
+  my $gpfis  = TTask->new("gpfis","Generate photo fission");      
+  $gtgama->Add($gtnext);
+  $gtgama->Add($gpairg);
+  $gtgama->Add($gcomp);
+  $gtgama->Add($gphot);
+  $gtgama->Add($grayl);
+  $gtgama->Add($gpfis);
+  my $guswim = TTask->new("guswim","magnetic field propagator");      
+  my $ggckov = TTask->new("ggckov","Generate Cherenkov photons");      
+  my $gsync  = TTask->new("gsync","Generate synchrotron radiation");      
+  my $gmults = TTask->new("gmults","Apply multiple scattering");      
+  my $gbreme = TTask->new("gbreme","Generate Bremsstrahlung");      
+  my $gdray  = TTask->new("gdray","Generate delta ray");      
+  my $ganni  = TTask->new("ganni","Generate Positron annihilation");      
+  my $gannir = TTask->new("gannir","Stopped tracks and annihilation at rest");      
+  
+  $gtelec->Add($gtnext);
+  $gtelec->Add($guswim);
+  $gtelec->Add($ggckov);
+  $gtelec->Add($gsync);
+  $gtelec->Add($gmults);
+  $gtelec->Add($gbreme);
+  $gtelec->Add($gdray);
+  $gtelec->Add($ganni);
+  $gtelec->Add($gannir);
+  my $guphad = TTask->new("guphad","Hadronic cross-section manager");      
+  my $guhadr = TTask->new("guhadr","Hadronic cascade manager");      
+  my $gdecay = TTask->new("gdecay","Particle decay");      
+  $gtneut->Add($gtnext);
+  $gtneut->Add($guphad);
+  $gtneut->Add($guhadr);
+  $gtneut->Add($gdecay);
+  
+  $gthadr->Add($gtnext);
+  $gthadr->Add($guphad);
+  $gthadr->Add($guswim);
+  $gthadr->Add($ggckov);
+  $gthadr->Add($gmults);
+  $gthadr->Add($guhadr);
+  $gthadr->Add($gdecay);
+  $gthadr->Add($gdray);
+  my $gbremm = TTask->new("gbremm","Generate Bremsstrahlung");      
+  my $gpairm = TTask->new("gpairm","Generate Pair production");      
+  my $gmunu  = TTask->new("gmunu","Generate Nuclear interaction");      
+  $gtmuon->Add($gtnext);
+  $gtmuon->Add($guswim);
+  $gtmuon->Add($ggckov);
+  $gtmuon->Add($gmults);
+  $gtmuon->Add($gbremm);
+  $gtmuon->Add($gpairm);
+  $gtmuon->Add($gdecay);
+  $gtmuon->Add($gdray);
+  $gtmuon->Add($gmunu);
+  $gtmuon->Add($gdecay);
+  
+  $gtnino->Add($gtnext);
+  my $glisur = TTask->new("glisur","Photon is reflected");      
+  $gtckov->Add($gtnext);
+  $gtckov->Add($glisur);
+  
+  $gthion->Add($gtnext);
+  $gthion->Add($guswim);
+  $gthion->Add($gmults);
+  $gthion->Add($guhadr);
+  $gthion->Add($gdray);
+  
+  TBrowser->new;
+  
   $gApplication->Run;
   
   __END__
@@ -1203,34 +1202,33 @@ This is a listing of all SOOT examples for Basic.
   
   # Setting alphanumeric labels in a 1-d histogram
   # author; Rene Brun
-  sub _labels1 {
-     use constant nx => 20;
-     my $people = ["Jean","Pierre","Marie","Odile","Sebastien","Fons","Rene",
-        "Nicolas","Xavier","Greg","Bjarne","Anton","Otto","Eddy","Peter","Pasha",
-        "Philippe","Suzanne","Jeff","Valery"];
-     my $c1 = TCanvas->new("c1","demo bin labels",10,10,900,500);
-     $c1->SetGrid();
-     $c1->SetBottomMargin(0.15);
-     my $h = TH1F->new("h","test",nx,0,nx);
-     $h->SetFillColor(38);
-     $h->Fill($gRandom->Gaus(0.5*nx,0.2*nx)*1.0) for (0..4999);
-     $h->SetStats(0);
-     $h->GetXaxis()->SetBinLabel($_,$people->[$_-1]) for (1..nx-1); # FIXME Can't locate object method "SetBinLabel" via package "enum" => Reason is that mInfo->Type()->TrueName() returns enum* instead of TAxis*!
-     $h->Draw();
-     my $pt = TPaveText->new(0.6,0.7,0.98,0.98,"brNDC");
-     $pt->SetFillColor(18);
-     $pt->SetTextAlign(12);
-     $pt->AddText("Use the axis Context Menu LabelsOption");
-     $pt->AddText(" \"a\"   to sort by alphabetic order");
-     $pt->AddText(" \">\"   to sort by decreasing vakues");
-     $pt->AddText(" \"<\"   to sort by increasing vakues");
-     $pt->Draw();
-  }
+  my $people = [qw(
+    Jean Pierre Marie Odile Sebastien Fons Rene
+    Nicolas Xavier Greg Bjarne Anton Otto Eddy Peter Pasha
+    Philippe Suzanne Jeff Valery
+  )];
+  my $size = scalar @$people;
   
-  _labels1;
+  my $c1 = TCanvas->new("c1","demo bin labels",10,10,900,500);
+  $c1->SetGrid();
+  $c1->SetBottomMargin(0.15);
+  my $h = TH1F->new("h","test",$size,0,$size);
+  $h->SetFillColor(38);
+  $h->Fill($gRandom->Gaus(0.5*$size,0.2*$size)*1.0) for 0..4999;
+  $h->SetStats(0);
+  $h->GetXaxis()->SetBinLabel($_,$people->[$_-1]) for 1..$size-1;
+  $h->Draw();
+  my $pt = TPaveText->new(0.6,0.7,0.98,0.98,"brNDC");
+  $pt->SetFillColor(18);
+  $pt->SetTextAlign(12);
+  $pt->AddText("Use the axis Context Menu LabelsOption");
+  $pt->AddText(" \"a\"   to sort by alphabetic order");
+  $pt->AddText(" \">\"   to sort by decreasing vakues");
+  $pt->AddText(" \"<\"   to sort by increasing vakues");
+  $pt->Draw();
+  
   $gApplication->Run;
   
-  __END__
 
 
 
@@ -1240,39 +1238,36 @@ This is a listing of all SOOT examples for Basic.
   use warnings;
   use SOOT ':all';
   
-  sub _labels2 {
-     use constant nx => 12;
-     use constant ny => 20;
-     my $months  = ["January","February","March","April","May","June","July",
-                    "August","September","October","November","December"];
-     my $people  = ["Jean","Pierre","Marie","Odile","Sebastien","Fons","Rene",
-        "Nicolas","Xavier","Greg","Bjarne","Anton","Otto","Eddy","Peter","Pasha",
-        "Philippe","Suzanne","Jeff","Valery"];
-     my $c1 = TCanvas->new("c1","demo bin labels",10,10,800,800);
-     $c1->SetGrid();
-     $c1->SetLeftMargin(0.15);
-     $c1->SetBottomMargin(0.15);
-     my $h = TH2F->new("h","test",nx,0,nx,ny,0,ny);
-     $h->Fill($gRandom->Gaus(0.5*nx,0.2*nx)*1.0, $gRandom->Gaus(0.5*ny,0.2*ny)*1.0) for (0..4999);
+  use constant nx => 12;
+  use constant ny => 20;
+  my $months  = [qw(January February March April May June July
+                    August September October November December)];
+  my $people  = [qw(Jean Pierre Marie Odile Sebastien Fons Rene
+                    Nicolas Xavier Greg Bjarne Anton Otto Eddy Peter Pasha
+                    Philippe Suzanne Jeff Valery)];
+  my $c1 = TCanvas->new("c1","demo bin labels",10,10,800,800);
+  $c1->SetGrid();
+  $c1->SetLeftMargin(0.15);
+  $c1->SetBottomMargin(0.15);
+  my $h = TH2F->new("h","test",nx,0,nx,ny,0,ny);
+  $h->Fill($gRandom->Gaus(0.5*nx,0.2*nx)*1.0, $gRandom->Gaus(0.5*ny,0.2*ny)*1.0) for 0..4999;
   
-     $h->SetStats(0);
-     $h->GetXaxis()->SetBinLabel($_,$months->[$_-1]) for (1..nx-1); # FIXME cf. bug in labels1.pl
-     $h->GetYaxis()->SetBinLabel($_,$people->[$_-1]) for (1..ny-1); 
-     $h->Draw("text");
-     
-     my $pt = TPaveText->new(0.6,0.85,0.98,0.98,"brNDC");
-     $pt->SetFillColor(18);
-     $pt->SetTextAlign(12);
-     $pt->AddText("Use the axis Context Menu LabelsOption");
-     $pt->AddText(" \"a\"   to sort by alphabetic order");
-     $pt->AddText(" \">\"   to sort by decreasing vakues");
-     $pt->AddText(" \"<\"   to sort by increasing vakues");
-     $pt->Draw();
+  $h->SetStats(0);
+  $h->GetXaxis()->SetBinLabel($_,$months->[$_-1]) for 1..nx-1;
+  $h->GetYaxis()->SetBinLabel($_,$people->[$_-1]) for 1..ny-1; 
+  $h->Draw("text");
   
-     $c1->Update();
-  }
+  my $pt = TPaveText->new(0.6,0.85,0.98,0.98,"brNDC");
+  $pt->SetFillColor(18);
+  $pt->SetTextAlign(12);
+  $pt->AddText("Use the axis Context Menu LabelsOption");
+  $pt->AddText(" \"a\"   to sort by alphabetic order");
+  $pt->AddText(" \">\"   to sort by decreasing values");
+  $pt->AddText(" \"<\"   to sort by increasing values");
+  $pt->Draw();
   
-  _labels2;
+  $c1->Update();
+  
   $gApplication->Run;
 
 
@@ -1514,7 +1509,7 @@ This is a listing of all SOOT examples for Basic.
      $f1->Draw();
      $f2->Draw("same");
      $f3->Draw("same");
-     $f1->GetYaxis()->SetMoreLogLabels(); # FIXME Once more, Get?axis fails: (Can't locate object method "SetMoreLogLabels" via package "G__p2memfunc")
+     $f1->GetYaxis()->SetMoreLogLabels(); # FIXME Can't locate object method "SetMoreLogLabels" via package "G__p2memfunc" at examples/Basic/logscale.pl line 43.
      $pave1 = TPaveText->new(-6,2,6,6);
      $pave1->SetFillColor(42);
      $pave1->SetTextAlign(12);
@@ -2325,259 +2320,255 @@ This is a listing of all SOOT examples for Basic.
   use warnings;
   use SOOT ':all';
   
-  sub _tree {
-    $gROOT->Reset();
-    
-    my $c1 = TCanvas->new('c1','Tree Data Structure',200,10,750,940);
-    $c1->Range(0,-0.1,1,1.15);
-    
-    $gBenchmark->Start('tree');
-    
-    my $branchcolor = 26;
-    my $leafcolor   = 30;
-    my $basketcolor = 42;
-    my $offsetcolor = 43;
-    
-    #title = TPaveLabel->new(.3,1.05,.8,1.13,c1.GetTitle());
-    my $title = TPaveLabel->new(.3,1.05,.8,1.13,'Tree Data Structure');
-    $title->SetFillColor(16);
-    $title->Draw();
-    
-    my $tree = TPaveText->new(.01,.75,.15,1.00);
-    $tree->SetFillColor(18);
-    $tree->SetTextAlign(12);
-    
-    my $tnt = $tree->AddText('Tree');
-    $tnt->SetTextAlign(22); # FIXME Can't locate method 'SetTextAlign' via package enum
-    $tnt->SetTextSize(0.030);
-    $tree->AddText('fScanField');
-    $tree->AddText('fMaxEventLoop');
-    $tree->AddText('fMaxVirtualSize');
-    $tree->AddText('fEntries');
-    $tree->AddText('fDimension');
-    $tree->AddText('fSelectedRows');
-    $tree->Draw();
-    
-    my $farm = TPavesText->new(.01,1.02,.15,1.1,9,'tr');
-    my $tfarm = $farm->AddText('CHAIN');
-    $tfarm->SetTextSize(0.024);
-    $farm->AddText('Collection');
-    $farm->AddText('of Trees');
-    $farm->Draw();
-    
-    my $link = TLine->new(.15,.92,.80,.92);
-    $link->SetLineWidth(2);
-    $link->SetLineColor(1);
-    $link->Draw();
-    $link->DrawLine(.21,.87,.21,.275);
-    $link->DrawLine(.23,.87,.23,.375);
-    $link->DrawLine(.25,.87,.25,.775);
-    $link->DrawLine(.41,.25,.41,-.025);
-    $link->DrawLine(.43,.25,.43,.075);
-    $link->DrawLine(.45,.25,.45,.175);
-    
-    my $branch0 = TPaveLabel->new(.20,.87,.35,.97,'Branch 0');
-    $branch0->SetTextSize(0.35);
-    $branch0->SetFillColor($branchcolor);
-    $branch0->Draw();
-    
-    my $branch1 = TPaveLabel->new(.40,.87,.55,.97,'Branch 1');
-    $branch1->SetTextSize(0.35);
-    $branch1->SetFillColor($branchcolor);
-    $branch1->Draw();
-    
-    my $branch2 = TPaveLabel->new(.60,.87,.75,.97,'Branch 2');
-    $branch2->SetTextSize(0.35);
-    $branch2->SetFillColor($branchcolor);
-    $branch2->Draw();
-    
-    my $branch3 = TPaveLabel->new(.80,.87,.95,.97,'Branch 3');
-    $branch3->SetTextSize(0.35);
-    $branch3->SetFillColor($branchcolor);
-    $branch3->Draw();
-    
-    my $leaf0 = TPaveLabel->new(.4,.75,.5,.8,'Leaf 0');
-    $leaf0->SetFillColor($leafcolor);
-    $leaf0->Draw();
-    
-    my $leaf1 = TPaveLabel->new(.6,.75,.7,.8,'Leaf 1');
-    $leaf1->SetFillColor($leafcolor);
-    $leaf1->Draw();
-    
-    my $leaf2 = TPaveLabel->new(.8,.75,.9,.8,'Leaf 2');
-    $leaf2->SetFillColor($leafcolor);
-    $leaf2->Draw();
-    
-    my $firstevent = TPaveText->new(.4,.35,.9,.4);
-    $firstevent->AddText('First event of each basket');
-    $firstevent->AddText('Array of fMaxBaskets Integers');
-    $firstevent->SetFillColor($basketcolor);
-    $firstevent->Draw();
-    
-    my $basket0 = TPaveLabel->new(.4,.25,.5,.3,'Basket 0');
-    $basket0->SetFillColor($basketcolor);
-    $basket0->Draw();
-    
-    my $basket1 = TPaveLabel->new(.6,.25,.7,.3,'Basket 1');
-    $basket1->SetFillColor($basketcolor);
-    $basket1->Draw();
-    
-    my $basket2 = TPaveLabel->new(.8,.25,.9,.3,'Basket 2');
-    $basket2->SetFillColor($basketcolor);
-    $basket2->Draw();
-    
-    my $offset = TPaveText->new(.55,.15,.9,.2);
-    $offset->AddText('Offset of events in fBuffer');
-    $offset->AddText('Array of fEventOffsetLen Integers');
-    $offset->AddText('(if variable length structure);');
-    $offset->SetFillColor($offsetcolor);
-    $offset->Draw();
-    
-    my $buffer = TPaveText->new(.55,.05,.9,.1);
-    $buffer->AddText('Basket buffer');
-    $buffer->AddText('Array of fBasketSize chars');
-    $buffer->SetFillColor($offsetcolor);
-    $buffer->Draw();
-    
-    my $zipbuffer = TPaveText->new(.55,-.05,.75,.0);
-    $zipbuffer->AddText('Basket compressed buffer');
-    $zipbuffer->AddText('(if compression);');
-    $zipbuffer->SetFillColor($offsetcolor);
-    $zipbuffer->Draw();
-    
-    my $ar1 = TArrow->new();
-    $ar1->SetLineWidth(2);
-    $ar1->SetLineColor(1);
-    $ar1->SetFillStyle(1001);
-    $ar1->SetFillColor(1);
-    $ar1->DrawArrow(.21,.275,.39,.275,0.015,'|>');
-    $ar1->DrawArrow(.23,.375,.39,.375,0.015,'|>');
-    $ar1->DrawArrow(.25,.775,.39,.775,0.015,'|>');
-    $ar1->DrawArrow(.50,.775,.59,.775,0.015,'|>');
-    $ar1->DrawArrow(.70,.775,.79,.775,0.015,'|>');
-    $ar1->DrawArrow(.50,.275,.59,.275,0.015,'|>');
-    $ar1->DrawArrow(.70,.275,.79,.275,0.015,'|>');
-    $ar1->DrawArrow(.45,.175,.54,.175,0.015,'|>');
-    $ar1->DrawArrow(.43,.075,.54,.075,0.015,'|>');
-    $ar1->DrawArrow(.41,-.025,.54,-.025,0.015,'|>');
-    
-    my $ldot = TLine->new(.95,.92,.99,.92);
-    $ldot->SetLineStyle(3);
-    $ldot->Draw();
-    $ldot->DrawLine(.9,.775,.99,.775);
-    $ldot->DrawLine(.9,.275,.99,.275);
-    $ldot->DrawLine(.55,.05,.55,0);
-    $ldot->DrawLine(.9,.05,.75,0);
-    
-    my $pname = TText->new(.46,.21,'fEventOffset');
-    $pname->SetTextFont(72);
-    $pname->SetTextSize(0.018);
-    $pname->Draw();
-    $pname->DrawText(.44,.11,'fBuffer');
-    $pname->DrawText(.42,.01,'fZipBuffer');
-    $pname->DrawText(.26,.81,'fLeaves = TObjArray of TLeaf');
-    $pname->DrawText(.24,.40,'fBasketEvent');
-    $pname->DrawText(.22,.31,'fBaskets = TObjArray of TBasket');
-    $pname->DrawText(.20,1.0,'fBranches = TObjArray of TBranch');
-    
-    my $ntleaf = TPaveText->new(0.30,.42,.62,.7);
-    $ntleaf->SetTextSize(0.014);
-    $ntleaf->SetFillColor($leafcolor);
-    $ntleaf->SetTextAlign(12);
-    $ntleaf->AddText('fLen: number of fixed elements');
-    $ntleaf->AddText('fLenType: number of bytes of data type');
-    $ntleaf->AddText('fOffset: relative to Leaf0-fAddress');
-    $ntleaf->AddText('fNbytesIO: number of bytes used for I/O');
-    $ntleaf->AddText('fIsPointer: True if pointer');
-    $ntleaf->AddText('fIsRange: True if leaf has a range');
-    $ntleaf->AddText('fIsUnsigned: True if unsigned');
-    $ntleaf->AddText('*fLeafCount: points to Leaf counter');
-    $ntleaf->AddText(' ');
-    $ntleaf->AddLine(0,0,0,0);
-    $ntleaf->AddText('fName = Leaf name');
-    $ntleaf->AddText('fTitle = Leaf type (see Type codes)');
-    $ntleaf->Draw();
-    
-    my $type = TPaveText->new(.65,.42,.95,.7);
-    $type->SetTextAlign(12);
-    $type->SetFillColor($leafcolor);
-    $type->AddText(' ');
-    $type->AddText('C : a character string');
-    $type->AddText('B : an 8 bit signed integer');
-    $type->AddText('b : an 8 bit unsigned integer');
-    $type->AddText('S : a 16 bit signed short integer');
-    $type->AddText('s : a 16 bit unsigned short integer');
-    $type->AddText('I : a 32 bit signed integer');
-    $type->AddText('i : a 32 bit unsigned integer');
-    $type->AddText('F : a 32 bit floating point');
-    $type->AddText('D : a 64 bit floating point');
-    $type->AddText('TXXXX : a class name TXXXX');
-    $type->Draw();
-    
-    my $typecode = TPaveLabel->new(.7,.68,.9,.72,'fType codes');
-    $typecode->SetFillColor($leafcolor);
-    $typecode->Draw();
-    
-    $ldot->DrawLine(.4,.75,.30,.7);
-    $ldot->DrawLine(.5,.75,.62,.7);
-    
-    my $ntbasket = TPaveText->new(0.02,-0.07,0.35,.25);
-    $ntbasket->SetFillColor($basketcolor);
-    $ntbasket->SetTextSize(0.014);
-    $ntbasket->SetTextAlign(12);
-    $ntbasket->AddText('fNbytes: Size of compressed Basket');
-    $ntbasket->AddText('fObjLen: Size of uncompressed Basket');
-    $ntbasket->AddText('fDatime: Date/Time when written to store');
-    $ntbasket->AddText('fKeylen: Number of bytes for the key');
-    $ntbasket->AddText('fCycle : Cycle number');
-    $ntbasket->AddText('fSeekKey: Pointer to Basket on file');
-    $ntbasket->AddText('fSeekPdir: Pointer to directory on file');
-    $ntbasket->AddText("fClassName: 'TBasket'");
-    $ntbasket->AddText('fName: Branch name');
-    $ntbasket->AddText('fTitle: Tree name');
-    $ntbasket->AddText(' ');
-    $ntbasket->AddLine(0,0,0,0);
-    $ntbasket->AddText('fNevBuf: Number of events in Basket');
-    $ntbasket->AddText('fLast: pointer to last used byte in Basket');
-    $ntbasket->Draw();
-    
-    $ldot->DrawLine(.4,.3,0.02,0.25);
-    $ldot->DrawLine(.5,.25,0.35,-.07);
-    $ldot->DrawLine(.5,.3,0.35,0.25);
-    
-    my $ntbranch = TPaveText->new(0.02,0.40,0.18,0.68);
-    $ntbranch->SetFillColor($branchcolor);
-    $ntbranch->SetTextSize(0.015);
-    $ntbranch->SetTextAlign(12);
-    $ntbranch->AddText('fBasketSize');
-    $ntbranch->AddText('fEventOffsetLen');
-    $ntbranch->AddText('fMaxBaskets');
-    $ntbranch->AddText('fEntries');
-    $ntbranch->AddText('fAddress of Leaf0');
-    $ntbranch->AddText(' ');
-    $ntbranch->AddLine(0,0,0,0);
-    $ntbranch->AddText('fName: Branchname');
-    $ntbranch->AddText('fTitle: leaflist');
-    $ntbranch->Draw();
-    
-    $ldot->DrawLine(.2,.97,.02,.68);
-    $ldot->DrawLine(.35,.97,.18,.68);
-    $ldot->DrawLine(.35,.87,.18,.40);
-    
-    my $basketstore = TPavesText->new(.8,-0.088,0.952,-0.0035,7,'tr');
-    $basketstore->SetFillColor(28);
-    $basketstore->AddText('Baskets');
-    $basketstore->AddText('Stores');
-    $basketstore->Draw();
-    $c1->Update();
-    
-    $gBenchmark->Show('tree');
-  }
+  $gROOT->Reset();
   
-  _tree;
+  my $c1 = TCanvas->new('c1','Tree Data Structure',200,10,750,940);
+  $c1->Range(0,-0.1,1,1.15);
+  
+  $gBenchmark->Start('tree');
+  
+  my $branchcolor = 26;
+  my $leafcolor   = 30;
+  my $basketcolor = 42;
+  my $offsetcolor = 43;
+  
+  #title = TPaveLabel->new(.3,1.05,.8,1.13,c1.GetTitle());
+  my $title = TPaveLabel->new(.3,1.05,.8,1.13,'Tree Data Structure');
+  $title->SetFillColor(16);
+  $title->Draw();
+  
+  my $tree = TPaveText->new(.01,.75,.15,1.00);
+  $tree->SetFillColor(18);
+  $tree->SetTextAlign(12);
+  
+  my $tnt = $tree->AddText('Tree');
+  $tnt->SetTextAlign(22);
+  $tnt->SetTextSize(0.030);
+  $tree->AddText('fScanField');
+  $tree->AddText('fMaxEventLoop');
+  $tree->AddText('fMaxVirtualSize');
+  $tree->AddText('fEntries');
+  $tree->AddText('fDimension');
+  $tree->AddText('fSelectedRows');
+  $tree->Draw();
+  
+  my $farm = TPavesText->new(.01,1.02,.15,1.1,9,'tr');
+  my $tfarm = $farm->AddText('CHAIN');
+  $tfarm->SetTextSize(0.024);
+  $farm->AddText('Collection');
+  $farm->AddText('of Trees');
+  $farm->Draw();
+  
+  my $link = TLine->new(.15,.92,.80,.92);
+  $link->SetLineWidth(2);
+  $link->SetLineColor(1);
+  $link->Draw();
+  $link->DrawLine(.21,.87,.21,.275);
+  $link->DrawLine(.23,.87,.23,.375);
+  $link->DrawLine(.25,.87,.25,.775);
+  $link->DrawLine(.41,.25,.41,-.025);
+  $link->DrawLine(.43,.25,.43,.075);
+  $link->DrawLine(.45,.25,.45,.175);
+  
+  my $branch0 = TPaveLabel->new(.20,.87,.35,.97,'Branch 0');
+  $branch0->SetTextSize(0.35);
+  $branch0->SetFillColor($branchcolor);
+  $branch0->Draw();
+  
+  my $branch1 = TPaveLabel->new(.40,.87,.55,.97,'Branch 1');
+  $branch1->SetTextSize(0.35);
+  $branch1->SetFillColor($branchcolor);
+  $branch1->Draw();
+  
+  my $branch2 = TPaveLabel->new(.60,.87,.75,.97,'Branch 2');
+  $branch2->SetTextSize(0.35);
+  $branch2->SetFillColor($branchcolor);
+  $branch2->Draw();
+  
+  my $branch3 = TPaveLabel->new(.80,.87,.95,.97,'Branch 3');
+  $branch3->SetTextSize(0.35);
+  $branch3->SetFillColor($branchcolor);
+  $branch3->Draw();
+  
+  my $leaf0 = TPaveLabel->new(.4,.75,.5,.8,'Leaf 0');
+  $leaf0->SetFillColor($leafcolor);
+  $leaf0->Draw();
+  
+  my $leaf1 = TPaveLabel->new(.6,.75,.7,.8,'Leaf 1');
+  $leaf1->SetFillColor($leafcolor);
+  $leaf1->Draw();
+  
+  my $leaf2 = TPaveLabel->new(.8,.75,.9,.8,'Leaf 2');
+  $leaf2->SetFillColor($leafcolor);
+  $leaf2->Draw();
+  
+  my $firstevent = TPaveText->new(.4,.35,.9,.4);
+  $firstevent->AddText('First event of each basket');
+  $firstevent->AddText('Array of fMaxBaskets Integers');
+  $firstevent->SetFillColor($basketcolor);
+  $firstevent->Draw();
+  
+  my $basket0 = TPaveLabel->new(.4,.25,.5,.3,'Basket 0');
+  $basket0->SetFillColor($basketcolor);
+  $basket0->Draw();
+  
+  my $basket1 = TPaveLabel->new(.6,.25,.7,.3,'Basket 1');
+  $basket1->SetFillColor($basketcolor);
+  $basket1->Draw();
+  
+  my $basket2 = TPaveLabel->new(.8,.25,.9,.3,'Basket 2');
+  $basket2->SetFillColor($basketcolor);
+  $basket2->Draw();
+  
+  my $offset = TPaveText->new(.55,.15,.9,.2);
+  $offset->AddText('Offset of events in fBuffer');
+  $offset->AddText('Array of fEventOffsetLen Integers');
+  $offset->AddText('(if variable length structure);');
+  $offset->SetFillColor($offsetcolor);
+  $offset->Draw();
+  
+  my $buffer = TPaveText->new(.55,.05,.9,.1);
+  $buffer->AddText('Basket buffer');
+  $buffer->AddText('Array of fBasketSize chars');
+  $buffer->SetFillColor($offsetcolor);
+  $buffer->Draw();
+  
+  my $zipbuffer = TPaveText->new(.55,-.05,.75,.0);
+  $zipbuffer->AddText('Basket compressed buffer');
+  $zipbuffer->AddText('(if compression);');
+  $zipbuffer->SetFillColor($offsetcolor);
+  $zipbuffer->Draw();
+  
+  my $ar1 = TArrow->new();
+  $ar1->SetLineWidth(2);
+  $ar1->SetLineColor(1);
+  $ar1->SetFillStyle(1001);
+  $ar1->SetFillColor(1);
+  $ar1->DrawArrow(.21,.275,.39,.275,0.015,'|>');
+  $ar1->DrawArrow(.23,.375,.39,.375,0.015,'|>');
+  $ar1->DrawArrow(.25,.775,.39,.775,0.015,'|>');
+  $ar1->DrawArrow(.50,.775,.59,.775,0.015,'|>');
+  $ar1->DrawArrow(.70,.775,.79,.775,0.015,'|>');
+  $ar1->DrawArrow(.50,.275,.59,.275,0.015,'|>');
+  $ar1->DrawArrow(.70,.275,.79,.275,0.015,'|>');
+  $ar1->DrawArrow(.45,.175,.54,.175,0.015,'|>');
+  $ar1->DrawArrow(.43,.075,.54,.075,0.015,'|>');
+  $ar1->DrawArrow(.41,-.025,.54,-.025,0.015,'|>');
+  
+  my $ldot = TLine->new(.95,.92,.99,.92);
+  $ldot->SetLineStyle(3);
+  $ldot->Draw();
+  $ldot->DrawLine(.9,.775,.99,.775);
+  $ldot->DrawLine(.9,.275,.99,.275);
+  $ldot->DrawLine(.55,.05,.55,0);
+  $ldot->DrawLine(.9,.05,.75,0);
+  
+  my $pname = TText->new(.46,.21,'fEventOffset');
+  $pname->SetTextFont(72);
+  $pname->SetTextSize(0.018);
+  $pname->Draw();
+  $pname->DrawText(.44,.11,'fBuffer');
+  $pname->DrawText(.42,.01,'fZipBuffer');
+  $pname->DrawText(.26,.81,'fLeaves = TObjArray of TLeaf');
+  $pname->DrawText(.24,.40,'fBasketEvent');
+  $pname->DrawText(.22,.31,'fBaskets = TObjArray of TBasket');
+  $pname->DrawText(.20,1.0,'fBranches = TObjArray of TBranch');
+  
+  my $ntleaf = TPaveText->new(0.30,.42,.62,.7);
+  $ntleaf->SetTextSize(0.014);
+  $ntleaf->SetFillColor($leafcolor);
+  $ntleaf->SetTextAlign(12);
+  $ntleaf->AddText('fLen: number of fixed elements');
+  $ntleaf->AddText('fLenType: number of bytes of data type');
+  $ntleaf->AddText('fOffset: relative to Leaf0-fAddress');
+  $ntleaf->AddText('fNbytesIO: number of bytes used for I/O');
+  $ntleaf->AddText('fIsPointer: True if pointer');
+  $ntleaf->AddText('fIsRange: True if leaf has a range');
+  $ntleaf->AddText('fIsUnsigned: True if unsigned');
+  $ntleaf->AddText('*fLeafCount: points to Leaf counter');
+  $ntleaf->AddText(' ');
+  $ntleaf->AddLine(0,0,0,0);
+  $ntleaf->AddText('fName = Leaf name');
+  $ntleaf->AddText('fTitle = Leaf type (see Type codes)');
+  $ntleaf->Draw();
+  
+  my $type = TPaveText->new(.65,.42,.95,.7);
+  $type->SetTextAlign(12);
+  $type->SetFillColor($leafcolor);
+  $type->AddText(' ');
+  $type->AddText('C : a character string');
+  $type->AddText('B : an 8 bit signed integer');
+  $type->AddText('b : an 8 bit unsigned integer');
+  $type->AddText('S : a 16 bit signed short integer');
+  $type->AddText('s : a 16 bit unsigned short integer');
+  $type->AddText('I : a 32 bit signed integer');
+  $type->AddText('i : a 32 bit unsigned integer');
+  $type->AddText('F : a 32 bit floating point');
+  $type->AddText('D : a 64 bit floating point');
+  $type->AddText('TXXXX : a class name TXXXX');
+  $type->Draw();
+  
+  my $typecode = TPaveLabel->new(.7,.68,.9,.72,'fType codes');
+  $typecode->SetFillColor($leafcolor);
+  $typecode->Draw();
+  
+  $ldot->DrawLine(.4,.75,.30,.7);
+  $ldot->DrawLine(.5,.75,.62,.7);
+  
+  my $ntbasket = TPaveText->new(0.02,-0.07,0.35,.25);
+  $ntbasket->SetFillColor($basketcolor);
+  $ntbasket->SetTextSize(0.014);
+  $ntbasket->SetTextAlign(12);
+  $ntbasket->AddText('fNbytes: Size of compressed Basket');
+  $ntbasket->AddText('fObjLen: Size of uncompressed Basket');
+  $ntbasket->AddText('fDatime: Date/Time when written to store');
+  $ntbasket->AddText('fKeylen: Number of bytes for the key');
+  $ntbasket->AddText('fCycle : Cycle number');
+  $ntbasket->AddText('fSeekKey: Pointer to Basket on file');
+  $ntbasket->AddText('fSeekPdir: Pointer to directory on file');
+  $ntbasket->AddText("fClassName: 'TBasket'");
+  $ntbasket->AddText('fName: Branch name');
+  $ntbasket->AddText('fTitle: Tree name');
+  $ntbasket->AddText(' ');
+  $ntbasket->AddLine(0,0,0,0);
+  $ntbasket->AddText('fNevBuf: Number of events in Basket');
+  $ntbasket->AddText('fLast: pointer to last used byte in Basket');
+  $ntbasket->Draw();
+  
+  $ldot->DrawLine(.4,.3,0.02,0.25);
+  $ldot->DrawLine(.5,.25,0.35,-.07);
+  $ldot->DrawLine(.5,.3,0.35,0.25);
+  
+  my $ntbranch = TPaveText->new(0.02,0.40,0.18,0.68);
+  $ntbranch->SetFillColor($branchcolor);
+  $ntbranch->SetTextSize(0.015);
+  $ntbranch->SetTextAlign(12);
+  $ntbranch->AddText('fBasketSize');
+  $ntbranch->AddText('fEventOffsetLen');
+  $ntbranch->AddText('fMaxBaskets');
+  $ntbranch->AddText('fEntries');
+  $ntbranch->AddText('fAddress of Leaf0');
+  $ntbranch->AddText(' ');
+  $ntbranch->AddLine(0,0,0,0);
+  $ntbranch->AddText('fName: Branchname');
+  $ntbranch->AddText('fTitle: leaflist');
+  $ntbranch->Draw();
+  
+  $ldot->DrawLine(.2,.97,.02,.68);
+  $ldot->DrawLine(.35,.97,.18,.68);
+  $ldot->DrawLine(.35,.87,.18,.40);
+  
+  my $basketstore = TPavesText->new(.8,-0.088,0.952,-0.0035,7,'tr');
+  $basketstore->SetFillColor(28);
+  $basketstore->AddText('Baskets');
+  $basketstore->AddText('Stores');
+  $basketstore->Draw();
+  $c1->Update();
+  
+  $gBenchmark->Show('tree');
+  
   $gApplication->Run;
   
-  __END__
 
 
 

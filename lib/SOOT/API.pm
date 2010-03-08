@@ -7,6 +7,7 @@ use base 'Exporter';
 
 our %EXPORT_TAGS = ( 'all' => [ qw(
   type cproto prevent_destruction print_ptrtable_state
+  is_same_object is_soot_class
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -31,8 +32,9 @@ SOOT::API - Perl interface to Perl-ROOT wrapper internals
 =head1 DESCRIPTION
 
 This package exposes some of the internals of the Perl-ROOT
-wrapper to Perl. All functions are to be considered experimental
-and subject to change. If you need a stable API, contact the author(s).
+wrapper to Perl. All functions are to be considered experimental,
+mostly for internal use only, and certainly subject to change.
+If you need a stable API, contact the author(s).
 
 =head2 EXPORT
 
@@ -45,26 +47,46 @@ all exported functions. You can import all functions with
 
 =head1 FUNCTIONS
 
-=head2 type
+=head2 type(object)
 
 Tries to guess the SOOT type of its argument and returns a
 string such as C<"INTEGER">.
 
-=head2 cproto
+=head2 cproto(object)
 
 Tries to guess the SOOT type of its argument and returns a
 string such as C<"int"> or C<"TGraph">.
 
-=head2 prevent_destruction
+=head2 prevent_destruction(object)
 
 Manually marks a given Perl object as not responsible for freeing
 the underlying ROOT object. If this is necessary, that's a bug in SOOT.
 This is a natural cause of memory leaks...
 
-=head2 print_ptrtable_state
+=head2 print_ptrtable_state()
 
 Prints the full state of the SOOT-internal garbage collection
 pointer table.
+
+=head2 is_same_object(obj1, obj2)
+
+Returns true of the given two Perl objects point to the same
+underlying TObject.
+Note that this function may produce segmentation faults if you
+pass in non-TObjects. Instead, you can use the overloaded
+nature of TObject wrappers and compare to objects with
+
+  $obj1 == $obj2
+
+for the same effect, but without the fragility.
+
+=head2 is_soot_class(className)
+
+Returns a boolean indicating whether the given class has
+been initialized as a SOOT class. If not, you can do so manually
+with
+
+  SOOT->Load($className)
 
 =head1 OTHER API CLASSES
 

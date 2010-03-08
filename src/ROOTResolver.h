@@ -74,10 +74,10 @@ namespace SOOT {
 
   /// Map any int* types to float*'s
   bool CProtoIntegerToFloat(std::vector<std::string>& cproto);
-  void FindMethodPrototype(G__ClassInfo& theClass, G__MethodInfo& mInfo,
+  void FindMethodPrototype(G__ClassInfo& theClass, G__MethodInfo*& mInfo,
                            const char* methName, std::vector<BasicType>& proto,
                            std::vector<std::string>& cproto, long int& offset,
-                           const unsigned int nTObjects);
+                           const unsigned int nTObjects, bool isFunction);
   void TwiddlePointersAndReferences(std::vector<BasicType>& proto, std::vector<std::string>& cproto,
                                     unsigned int reference_map);
 
@@ -90,7 +90,8 @@ namespace SOOT {
   SV* CallMethod(pTHX_ const char* className, char* methName, AV* args);
   SV* CallAssignmentOperator(pTHX_ const char* className, SV* receiver, SV* model);
 
-  void CroakOnInvalidMethod(pTHX_ const char* className, const char* methName, TClass* c, const std::vector<std::string>& cproto);
+  void CroakOnInvalidCall(pTHX_ const char* className, const char* methName,
+                          TClass* c, const std::vector<std::string>& cproto, bool isFunction);
 } // end namespace SOOT
 
 #endif

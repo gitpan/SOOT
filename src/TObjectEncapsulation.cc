@@ -103,20 +103,19 @@ namespace SOOT {
   }
 
 
-  /*  ... YAGNI ...
-  void
-  CastObject(pTHX_ SV* thePerlObject, const char* newType)
-  {
-    sv_bless(thePerlObject, gv_stashpv(newType, GV_ADD));
-  }
-  */
-
-
   void
   PreventDestruction(pTHX_ SV* thePerlObject) {
-    if (SvROK(thePerlObject) && SvIOK((SV*)SvRV(thePerlObject))) {
-      SV* inner = (SV*)SvRV(thePerlObject);
-      TObject* ptr = INT2PTR(TObject*, SvIV(inner));
+    // We accept either a reference (i.e. the blessed object)
+    // or the already dereferenced object which is really just an
+    // SvIOK with the pointer to the TObject.
+
+    // Dereference if necessary
+    if (SvROK(thePerlObject))
+      thePerlObject = (SV*)SvRV(thePerlObject);
+
+    // Check that we have what we presume to be a pointer
+    if (SvIOK(thePerlObject)) {
+      TObject* ptr = INT2PTR(TObject*, SvIV(thePerlObject));
       PtrAnnotation* refPad = gSOOTObjects->Fetch(ptr);
       if (ptr == NULL || refPad == NULL) {
         // late intialization always prevents destruction
@@ -205,5 +204,13 @@ namespace SOOT {
     gSOOTObjects->Delete(object);
   }
 
+
+  bool
+  IsSameTObject(pTHX_ SV* perlObj1, SV* perlObj2)
+  {
+    void* tobj1 = (void*)LobotomizeObject(aTHX_ perlObj1);
+    void* tobj2 = (void*)LobotomizeObject(aTHX_ perlObj2);
+    return(tobj1 == tobj2);
+  }
 } // end namespace SOOT
 
