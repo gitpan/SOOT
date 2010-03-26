@@ -1,26 +1,43 @@
---- #YAML:1.0
-name:               SOOT
-version:            0.05
-abstract:           Use ROOT from Perl
+---
+abstract: 'Use ROOT from Perl'
 author:
-    - Steffen Mueller <smueller@cpan.org>
-license:            unknown
-distribution_type:  module
-configure_requires:
-    ExtUtils::MakeMaker:  0
+  - 'Steffen Mueller <smueller@cpan.org>'
 build_requires:
-    ExtUtils::MakeMaker:  0
-requires:
-    Data::Dumper:        0
-    ExtUtils::Constant:  0
-    ExtUtils::XSpp:      0.07
-no_index:
-    directory:
-        - t
-        - inc
-        - buildtools
-        - inc
-generated_by:       ExtUtils::MakeMaker version 6.56
+  ExtUtils::CBuilder: 0
+  ExtUtils::Constant: 0
+  ExtUtils::ParseXS: 0
+  ExtUtils::Typemap: 0.04
+  ExtUtils::XSpp: 0.07
+  File::Path: 0
+  File::Spec: 0
+configure_requires:
+  Module::Build: 0.36
+dynamic_config: 1
+generated_by: 'Module::Build version 0.3603'
+license: gpl
 meta-spec:
-    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
-    version:  1.4
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: SOOT
+provides:
+  SOOT:
+    file: lib/SOOT.pm
+    version: 0.06
+  SOOT::API:
+    file: lib/SOOT/API.pm
+  TArray:
+    file: lib/TArray.pm
+  TObject:
+    file: lib/TObject.pm
+requires:
+  Carp: 1.01
+  Data::Dumper: 0
+  perl: 5.008
+  strict: 0
+  version: 0
+  warnings: 0
+resources:
+  bugtracker: http://rt.cpan.org/NoAuth/Bugs.html?Dist=SOOT
+  license: http://www.opensource.org/licenses/gpl-2.0.php
+  repository: git://github.com/tsee/SOOT.git
+version: 0.06

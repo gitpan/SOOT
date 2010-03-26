@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp 'croak';
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use base 'Exporter';
 use SOOT::Constants;
@@ -16,9 +16,10 @@ our %EXPORT_TAGS = (
     $gApplication $gSystem $gRandom $gROOT
     $gDirectory $gStyle $gPad $gBenchmark
     $gEnv
+    $gHistImagePalette $gWebImagePalette
   ) ],
   'constants' => \@SOOT::Constants::Names,
-  'functions' => [qw( Load )],
+  'functions' => [qw( Load UpdateClasses )],
 );
 use vars @{$EXPORT_TAGS{globals}};
 
@@ -29,8 +30,6 @@ our @EXPORT;
 
 require XSLoader;
 XSLoader::load('SOOT', $VERSION);
-
-_bootstrap_AUTOLOAD(); # FIXME move to XS...
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -55,22 +54,6 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-sub _bootstrap_AUTOLOAD {
-  my $classIter = SOOT::API::ClassIterator->new;
-  no strict 'refs';
-  while (defined(my $class = $classIter->next)) {
-    # they have their own AUTOLOAD
-    next if $class eq 'TObject' or $class eq 'TArray';
-    if ($class->isa('TArray')) {
-      *{"${class}::AUTOLOAD"} = \&TArray::AUTOLOAD;
-    }
-    #elsif ($class->isa('TObject')) {
-    else {
-      *{"${class}::AUTOLOAD"} = \&TObject::AUTOLOAD;
-    }
-  }
-}
-
 sub Load {
   shift if @_ and defined $_[0] and $_[0] eq 'SOOT';
   Carp::croak("Usage: SOOT->Load(classname, classname2, ...)")
@@ -79,23 +62,20 @@ sub Load {
   my $new = 0;
   foreach my $class (@_) {
     no strict 'refs';
+    no warnings 'once';
     next if defined ${"${class}::isROOT"};
-    my $genclasses = GenerateROOTClass($class);
-    foreach my $gclass (@{$genclasses}) {
-      next if $gclass eq 'TObject' or $gclass eq 'TArray';
-      next if defined ${"${class}::isROOT"};
-      ++$new;
-      if ($gclass->isa('TArray')) {
-        *{"${gclass}::AUTOLOAD"} = \&TArray::AUTOLOAD;
-      }
-      #elsif ($gclass->isa('TObject')) {
-      else {
-        *{"${gclass}::AUTOLOAD"} = \&TObject::AUTOLOAD;
-      }
-    }
+    GenerateROOTClass($class);
   }
   
   return $new;
+}
+
+sub UpdateClasses {
+  shift if @_ and defined $_[0] and $_[0] eq 'SOOT';
+  Carp::croak("Usage: SOOT->UpdateClasses()")
+    if @_;
+  GenerateClassStubs();
+  return 1;
 }
 
 # For some reason, the normal gBenchmark from XS will segfault on first use.
@@ -161,12 +141,14 @@ The list of currently supported globals is:
   $gApplication $gSystem $gRandom $gROOT
   $gDirectory   $gStyle  $gPad    $gBenchmark
   $gEnv
+  $gHistImagePalette $gWebImagePalette
 
 The list of currently exported functions:
 
   Load(className, className2,...)
+  UpdateClasses()
 
-=head1 JUMP-START FOR C++-ROOT users
+=head1 JUMP-START FOR C++-ROOT USERS
 
 This section outlines the differences between using
 ROOT from C++ or from Perl via SOOT. If in doubt, the two
@@ -298,8 +280,6 @@ This will print:
 
 =head2 Availability of ROOT Classes
 
-TODO: This section is a draft. Things may or may not work at this point.
-
 By default, SOOT loads most of the available ROOT classes and
 wraps them for use in Perl. If some class is not available,
 you may try to load it as follows:
@@ -314,9 +294,25 @@ interface.
 If you want to use classes from a shared library that is not
 loaded by default, everything should work if you do the following:
 
-  # FIXME test this
-  $gSystem->Load('libSomething.so');
-  SOOT::Load('TSomething'); # or whatever
+  $gSystem->Load('libGeom.so');
+  $gSystem->Load('libGeomBuilder.so');
+  SOOT::UpdateClasses(); # Bind ALL new classes
+
+Alternatively you may bind only what you need:
+
+  $gSystem->Load('libGeom.so');
+  $gSystem->Load('libGeomBuilder.so');
+  SOOT::Load('TGeoMaterial'); # or whatever
+
+Updating all classes may be a relatively slow operation.
+A third approach is using the special TSystem::LoadNUpddate method
+which is not part of the normal ROOT interface:
+
+  $gSystem->Load('libGeom.so');
+  $gSystem->LoadNUpdate('libGeomBuilder.so');
+
+C<LoadNUpdate()> will bind any new classes B<if> the library was loaded
+successfully and wasn't loaded before.
 
 =head1 FUNCTIONS
 
@@ -326,6 +322,46 @@ Loads one or more ROOT classes and their base classes into Perl.
 Virtually all ROOT classes should be loaded out of the box.
 This function is only necessary if you load additional
 shared libraries.
+
+=head2 UpdateClasses
+
+After loading non-standard shared libraries that provide ROOT-based classes,
+it may be necessary to update the Perl-bindings for those classes. You may
+either use C<Load()> if you know which exact classes you want to bind, or
+you may call C<SOOT::UpdateClasses()> to check the whole ROOT class table
+for classes that were previously not available to Perl.
+
+=head1 INSTALLATION
+
+Eventually, SOOT I<might> be shipped with ROOT. Until that happens,
+you need to do the following: Set your ROOT paths as usual. Make sure
+the F<root-config> program is available and executable via the C<PATH>.
+
+Then build SOOT like any other CPAN module. To install a release from CPAN,
+type:
+
+  sudo cpan SOOT
+
+To do so manually, do:
+
+  tar -xzf SOOT-0.05.tar.gz
+  cd SOOT-0.05
+  perl Makefile.PL
+  make
+  make test
+  (sudo make install)
+
+Without installing, you may run the SOOT examples from the SOOT directory
+where you just typed C<make> as follows:
+
+  perl -Mblib examples/Hist/hstack.pl
+
+The C<-Mblib> indicates that perl should preferably load modules from the
+F<blib> (read: C<build-library>) directory of the current directory which
+contains the uninstalled SOOT library.
+
+B<NOTE:> At this point, SOOT requires a copy of ROOT that has been configured
+with the C<--enable-explicitlink> option, which -- sadly -- isn't the default.
 
 =head1 SEE ALSO
 

@@ -1,5 +1,6 @@
 
 #include "ClassGenerator.h"
+#include "SOOTDebug.h"
 
 #include "ClassIterator.h"
 #include "TObjectEncapsulation.h"
@@ -13,11 +14,6 @@ namespace SOOT {
   void
   GenerateClassStubs(pTHX)
   {
-    // To be removed soon
-    /*for (unsigned int iClass = 0; iClass < gNClassNames; ++iClass) {
-      const char* className = gClassNames[iClass];
-      MakeClassStub(aTHX_ className, NULL);
-    }*/
     vector<const char*> classes;
 
     ClassIterator iter;
@@ -25,15 +21,6 @@ namespace SOOT {
     while ( (className = iter.next()) != NULL) {
       vector<TString> c = MakeClassStub(aTHX_ className, NULL);
     }
-    // ENOTWORKING
-    /*
-    TIter clIter( gROOT->GetListOfClasses() );
-    TClass* cl;
-    while ((cl = (TClass*)clIter.Next())) {
-      cout << cl->GetName() << endl;
-      MakeClassStub(aTHX_ cl->GetName(), cl);
-    }*/
-
   }
 
   std::vector<TString>
@@ -62,12 +49,12 @@ namespace SOOT {
     retval.push_back(className);
 
     SetupTObjectMethods(aTHX_ className);
+    SetupAUTOLOAD(aTHX_ className);
 
     vector<TString> baseClasses = SetupClassInheritance(aTHX_ className, theClass);
     retval.reserve(retval.size()+baseClasses.size());
     retval.insert(retval.end(), baseClasses.begin(), baseClasses.end());
-
-    //SetupAUTOLOAD(aTHX_ className);
+    return retval;
   }
 
 // Note: Keep that header in sync.
@@ -128,21 +115,16 @@ namespace SOOT {
   void
   SetupAUTOLOAD(pTHX_ const char* className)
   {
-    croak("FIXME SetupAUTOLOAD awaits non-buggy implementation");
-/*    ostringstream str;
+    ostringstream str;
     str << className << "::AUTOLOAD";
     const string s = str.str();
     GV* gv = gv_fetchpvn_flags(s.c_str(), s.length(), GV_ADD, SVt_PVGV);
     if (gv == NULL)
       cout << "BAD GV" << endl;
-    GV* srcgv = gv_fetchpvn_flags("TObject::AUTOLOAD", strlen("TObject::AUTOLOAD"), 0, SVt_PVCV);
-    //CV* cv = get_cvn_flags("TObject::AUTOLOAD", strlen("TObject::AUTOLOAD"), 0);
-    //if (cv == NULL)
-    //  cout << "BAD CV" << endl;
-    if (srcgv == NULL)
-      cout << "BAD SRC GV" << endl;
-    sv_setsv((SV*)gv, (SV*)newSVrv((SV*)cv, NULL));
-    */
+    CV* cv = get_cvn_flags("TObject::AUTOLOAD", strlen("TObject::AUTOLOAD"), 0);
+    if (cv == NULL)
+      cout << "BAD CV" << endl;
+    sv_setsv((SV*)gv, sv_2mortal((SV*)newRV_inc((SV*)cv))); // FIXME validate that the mortialization is correct
   }
 
 
@@ -158,6 +140,8 @@ namespace SOOT {
     SetPerlGlobal(aTHX_ "SOOT::gStyle", gStyle);
     SetPerlGlobal(aTHX_ "SOOT::gEnv", gEnv);
     SetPerlGlobal(aTHX_ "SOOT::gDirectory", gDirectory);
+    SetPerlGlobal(aTHX_ "SOOT::gHistImagePalette", gHistImagePalette);
+    SetPerlGlobal(aTHX_ "SOOT::gWebImagePalette", gWebImagePalette);
     SetPerlGlobalDelayedInit(aTHX_ "SOOT::gPad", (TObject**)&gPad, "TVirtualPad"); // gPad NULL at this time!
     // Initialized in SOOT.pm to band-aid a SEGV:
     //SetPerlGlobalDelayedInit(aTHX_ "SOOT::gBenchmark", (TObject**)&gBenchmark, "TBenchmark");

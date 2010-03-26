@@ -2,6 +2,8 @@
 /* must load ROOT stuff veeery early due to pollution */
 #include "ROOTIncludes.h"
 
+#include "SOOTDebug.h"
+
 // manually include headers for classes with explicit wrappers
 // rootclasses.h was auto-generated to include all ROOT headers
 // for which there is a ROOT_XSP/...xsp file
@@ -9,6 +11,7 @@
 
 #include "CPerlTypeConversion.h"
 #include "PerlCTypeConversion.h"
+#include "SOOTTypes.h"
 #include "ClassGenerator.h"
 #include "TObjectEncapsulation.h"
 #include "ROOTResolver.h"
@@ -73,17 +76,17 @@ MODULE = SOOT		PACKAGE = SOOT
 
 PROTOTYPES: DISABLE
 
-INCLUDE: const-xs.inc
+INCLUDE: ../const-xs.inc
 
-INCLUDE: XS/SOOTBOOT.xs
+INCLUDE: ../XS/SOOTBOOT.xs
 
-INCLUDE: XS/SOOTAPI.xs
+INCLUDE: ../XS/SOOTAPI.xs
 
-INCLUDE: XS/TObject.xs
+INCLUDE: ../XS/TObject.xs
 
-INCLUDE: rootclasses.xsinclude
+INCLUDE: ../rootclasses.xsinclude
 
-INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t typemap.xsp XS/ClassIterator.xsp
+INCLUDE_COMMAND: $^X -MExtUtils::XSpp::Cmd -e xspp -- -t ../typemap.xsp ../XS/ClassIterator.xsp
 
 MODULE = SOOT		PACKAGE = SOOT
 
@@ -93,7 +96,6 @@ CallMethod(className, methodName, argv)
     char* methodName
     SV* argv
   INIT:
-    STRLEN len;
     AV* arguments;
   CODE:
   /*
@@ -125,9 +127,6 @@ CallAssignmentOperator(className, receiver, model)
     char* className
     SV* receiver
     SV* model
-  INIT:
-    STRLEN len;
-    AV* arguments;
   CODE:
     croak("CallAssignmentOperator not implemented correctly");
     RETVAL = SOOT::CallAssignmentOperator(aTHX_ className, receiver, model);
@@ -153,5 +152,11 @@ GenerateROOTClass(className)
         av_store(av, i, newSVpv(classes[i].Data(), classes[i].Length()));
     }
   OUTPUT: RETVAL
+
+
+void
+GenerateClassStubs()
+  PPCODE:
+    SOOT::GenerateClassStubs(aTHX);
 
 
