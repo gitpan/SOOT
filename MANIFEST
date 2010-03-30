@@ -144,6 +144,7 @@ MANIFEST			This list of files
 MANIFEST.SKIP
 perlobject.map
 ppport.h
+README
 ROOT_XSP/TArrayC.xsp
 ROOT_XSP/TArrayD.xsp
 ROOT_XSP/TArrayF.xsp
@@ -167,7 +168,6 @@ src/ClassIterator.h
 src/CPerlTypeConversion.cc
 src/CPerlTypeConversion.h
 src/ExternalXSUBs.h
-src/Makefile.PL
 src/PerlCTypeConversion.cc
 src/PerlCTypeConversion.h
 src/PtrTable.cc
@@ -178,6 +178,7 @@ src/ROOTResolver.h
 src/SOOTDebug.h
 src/SOOTTypes.cc
 src/SOOTTypes.h
+src/SOOTTypes.inline.h
 src/TObjectEncapsulation.cc
 src/TObjectEncapsulation.h
 src/TObjectEncapsulation.inline.h
@@ -195,5 +196,4 @@ XS/TObject.xs
 xt/800SimpleDraw.pl
 xt/900leak.t
 xt/manualCTest/test.cc
-README
 META.yml

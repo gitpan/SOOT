@@ -28,8 +28,6 @@ namespace SOOT {
     "INVALID",
   };
 
-// This isn't really checking ->isa('TObject') but whether it's part of the SOOT/ROOT system
-#define IS_TOBJECT(sv) (sv_isobject((sv)) && hv_exists(SvSTASH((SV*)SvRV((sv))), "isROOT", 6))
 
   /* Lifted from autobox. My eternal gratitude goes to the
    * ever impressive Chocolateboy!
@@ -82,18 +80,18 @@ namespace SOOT {
 #endif
         if (SvROK(sv)) {
 #ifdef SOOT_DEBUG
-          cout << "Svt_PVMG && SvROK && (IS_TOBJECT(sv) ? eTOBJECT : eREF)" << endl;
+          cout << "Svt_PVMG && SvROK && (IsTObject(aTHX_ sv) ? eTOBJECT : eREF)" << endl;
 #endif
-          return IS_TOBJECT(sv) ? eTOBJECT : eREF;
+          return IsTObject(aTHX_ sv) ? eTOBJECT : eREF;
         } else {
           return eSTRING;
         }
       case SVt_PVLV:
         if (SvROK(sv)) {
 #ifdef SOOT_DEBUG
-          cout << "Svt_PVLV && SvROK && (IS_TOBJECT(sv) ? eTOBJECT : eREF)" << endl;
+          cout << "Svt_PVLV && SvROK && (IsTObject(aTHX_ sv) ? eTOBJECT : eREF)" << endl;
 #endif
-          return IS_TOBJECT(sv) ? eTOBJECT : eREF;
+          return IsTObject(aTHX_ sv) ? eTOBJECT : eREF;
         }
         else if (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T') { /* tied lvalue */
           if (SvIOK(sv))
@@ -128,7 +126,7 @@ namespace SOOT {
 #endif
       default:
         if (SvROK(sv)) {
-          if (IS_TOBJECT(sv))
+          if (IsTObject(aTHX_ sv))
             return eTOBJECT;
           switch (SvTYPE(SvRV(sv))) {
             case SVt_PVAV:
@@ -177,43 +175,33 @@ namespace SOOT {
     }
   }
 
-  const char*
-  CProtoFromType(pTHX_ SV* const sv, STRLEN& len)
+  std::string
+  CProtoFromType(pTHX_ SV* const sv)
   {
-    return CProtoFromType(aTHX_ sv, len, GuessType(aTHX_ sv));
+    return CProtoFromType(aTHX_ sv, GuessType(aTHX_ sv));
   }
 
-  const char*
-  CProtoFromType(pTHX_ SV* const sv, STRLEN& len, BasicType type)
+  std::string
+  CProtoFromType(pTHX_ SV* const sv, BasicType type)
   {
-    std::string tmp;
     // TODO figure out references vs. pointers
     switch (type) {
       case eTOBJECT:
-        tmp = std::string(sv_reftype(SvRV(sv), TRUE)) + std::string("*");
-        len = tmp.length();
-        return tmp.c_str();
+        return std::string(sv_reftype(SvRV(sv), TRUE)) + std::string("*");
       case eINTEGER:
-        len = 3;
-        return "int";
+        return std::string("int");
       case eFLOAT:
-        len = 6;
-        return "double";
+        return std::string("double");
       case eSTRING:
-        len = 5;
-        return "char*";
+        return std::string("char*");
       case eARRAY_INTEGER:
-        len = 4;
-        return "int*";
+        return std::string("int*");
       case eARRAY_FLOAT:
-        len = 7;
-        return "double*";
+        return std::string("double*");
       case eARRAY_STRING:
-        len = 6;
-        return "char**";
+        return std::string("char**");
       default:
-        len = 0;
-        return NULL;
+        return std::string("");
     }
   }
 
@@ -235,8 +223,7 @@ namespace SOOT {
   char*
   CProtoFromAV(pTHX_ AV* av, const unsigned int nSkip = 1)
   {
-    vector<const char*> protos;
-    vector<STRLEN> lengths;
+    vector<string> protos;
     SV** elem;
     STRLEN len;
     unsigned int totalLen = 0;
@@ -249,11 +236,10 @@ namespace SOOT {
       elem = av_fetch(av, iElem, 0);
       if (elem == NULL)
         croak("av_fetch failed. Severe error.");
-      const char* thisCProto = CProtoFromType(aTHX_ *elem, len);
+      std::string thisCProto = CProtoFromType(aTHX_ *elem);
       //cout << thisCProto<<endl;
       protos.push_back(thisCProto);
-      lengths.push_back(len);
-      totalLen += len+1;
+      totalLen += thisCProto.length();
       //cout << len << endl;
     }
     
@@ -262,8 +248,8 @@ namespace SOOT {
     //Newx((void*)cproto, totalLen, char);
     unsigned int pos = 0;
     for (unsigned int iElem = 0; iElem < protos.size(); ++iElem) {
-      len = lengths[iElem];
-      strncpy((char*)(cproto+pos), protos[iElem], len);
+      len = protos[iElem].length();
+      strncpy((char*)(cproto+pos), protos[iElem].c_str(), len);
       pos += len;
       cproto[pos] = ',';
       ++pos;
@@ -278,7 +264,6 @@ namespace SOOT {
                        std::vector<std::string>& cproto, const unsigned int nSkip)
   {
     SV** elem;
-    STRLEN len;
     unsigned int nTObjects = 0;
     // convert the elements into C prototype strings
     const unsigned int nElem = (unsigned int)(av_len(av)+1);
@@ -296,8 +281,8 @@ namespace SOOT {
       if (type == eTOBJECT)
         ++nTObjects;
       avtypes.push_back(type);
-      const char* thisCproto = CProtoFromType(aTHX_ *elem, len, type);
-      if (thisCproto == NULL) {
+      std::string thisCproto = CProtoFromType(aTHX_ *elem, type);
+      if (thisCproto.length() == 0) {
 #ifdef SOOT_DEBUG
         cout << "types so far: ";
         for (unsigned int i = 0; i < cproto.size(); i++)

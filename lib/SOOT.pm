@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp 'croak';
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use base 'Exporter';
 use SOOT::Constants;
@@ -372,6 +372,11 @@ L<SOOT::API> exposes some of the underlying SOOT-internals.
 L<SOOT::App> implements a F<root.exe>/CInt-like front-end
 using L<Devel::REPL>. It is not part of SOOT and is available
 separately from CPAN.
+
+=head1 ACKNOWLEDGMENTS
+
+Eric Wilhelm and David Golden put up with my stupid questions about Module::Build
+and always stayed civil and helpful. Thanks for that!
 
 =head1 AUTHOR
 

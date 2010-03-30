@@ -114,6 +114,7 @@ namespace SOOT {
         //       char* const* where the *'s aren't all at the end
         if (ptr_level > 0)
           *(ptr - ptr_level) = '\0';
+        //cout << "Registering object '" << (void*)addr << "' of type '" << typeStrWithoutPtr << "'" << endl;
         retval = SOOT::RegisterObject(aTHX_ (TObject*)addr, typeStrWithoutPtr);
         // If we're not creating a TObject via a constructor, it's likely not ours to delete
         if (!isConstructor)
@@ -195,13 +196,15 @@ namespace SOOT {
       receiver = 0;
     }
     else {
-      --nTObjects; // The invocant isn't used int FindMethodPrototype
+      --nTObjects; // The invocant isn't used in FindMethodPrototype
       receiver = LobotomizeObject(aTHX_ perlCallReceiver);
     }
     FindMethodPrototype(theClass, mInfo, methName, argTypes, cproto, offset, nTObjects, (perlCallReceiver == NULL ? true : false), constructor);
 
-    if (!mInfo->IsValid() || !mInfo->Name())
+    if (!mInfo->IsValid() || !mInfo->Name()) {
+      delete mInfo;
       CroakOnInvalidCall(aTHX_ className, methName, c, cproto, false); // FIXME cproto may have been mangled by FindMethodPrototype
+    }
 
     vector<void*> needsCleanup;
     // Determine return type
@@ -219,6 +222,7 @@ namespace SOOT {
 */
     // FIXME ... defies description
     BasicType retType = GuessTypeFromProto(constructor ? (string(className)+string("*")).c_str() : retTypeStr);
+
     // Prepare CallFunc
     G__CallFunc theFunc;
     theFunc.SetFunc(*mInfo);
@@ -231,6 +235,8 @@ namespace SOOT {
       addrD = theFunc.ExecDouble((void*)((long)receiver + offset));
     else
       addr = theFunc.ExecInt((void*)((long)receiver + offset));
+
+    delete mInfo;
 
     //cout << "RETVAL INFO FOR " <<  methName << ": cproto=" << retTypeStr << " mytype=" << gBasicTypeStrings[retType] << endl;
     return ProcessReturnValue(aTHX_ retType, addr, addrD, retTypeStr, constructor, needsCleanup);
@@ -275,6 +281,7 @@ namespace SOOT {
       void* ptr = meth->InterfaceMethod();
       if (!ptr)
         CroakOnInvalidCall(aTHX_ theClass.Name(), methName, &c, cproto, true);
+      delete mInfo;
       mInfo = new G__MethodInfo(theClass);
       bool found = false;
       while (mInfo->Next()) {
@@ -286,7 +293,8 @@ namespace SOOT {
       if (!found)
         CroakOnInvalidCall(aTHX_ theClass.Name(), methName, &c, cproto, true);
     } else {
-      mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
+      delete mInfo;
+      mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset)); // FIXME valgrind thinks this might leak
     }
     if (freeCProtoStr)
       free(cprotoStr);
@@ -303,6 +311,7 @@ namespace SOOT {
           cprotoStr = (char*)"";
           freeCProtoStr = false;
         }
+        delete mInfo;
         mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
         if (freeCProtoStr)
           free(cprotoStr);
@@ -320,6 +329,7 @@ namespace SOOT {
             cprotoStr = (char*)"";
             freeCProtoStr = false;
           }
+          delete mInfo;
           mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
           if (freeCProtoStr)
             free(cprotoStr);

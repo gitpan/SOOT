@@ -30,17 +30,30 @@
 using namespace std;
 
 int main (int /*argc*/, char** /*argv*/) {
-  gDebug = 1;
-  gSystem->Load("libMathCore");
-  gSystem->Load("libPhysics");
-  gSystem->Load("libCore");
-  int iCl = 0;
-  while (iCl < gClassTable->Classes()) {
-    const char* name = gClassTable->At(iCl++);
-    TClass* c = TClass::GetClass(name);
+  TH1D* hist = new TH1D("hist", "hist", 2, 0., 1.);
+
+  // Now try to call GetXaxis...
+  TClass* histClass = TClass::GetClass("TH1D");
+  if (histClass == NULL) {
+    cout << "Couldn't get TClass" << endl;
+    return 1;
   }
 
-  gApplication = new TApplication("nbbb", NULL, NULL);
+  const char* cproto = ""; // ->GetXaxis(void)!
 
+  TObject* callee = (TObject*)hist;
+  G__ClassInfo theClass("TH1D");
+  long offset;
+  G__MethodInfo  mInfo = theClass.GetMethod("GetXaxis", cproto, &offset);
+  if (!mInfo.InterfaceMethod()) {
+    cout << "Invalid mInfo" << endl;
+    return 1;
+  }
+
+  const char* retType = mInfo.Type()->TrueName();
+  cout << "Return type: " << retType << endl;
+
+  delete hist;
+  return 0;
 }
 
