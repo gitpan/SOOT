@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp 'croak';
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 use base 'Exporter';
 use SOOT::Constants;
@@ -344,8 +344,8 @@ type:
 
 To do so manually, do:
 
-  tar -xzf SOOT-0.05.tar.gz
-  cd SOOT-0.05
+  tar -xzf SOOT-0.XX.tar.gz
+  cd SOOT-0.XX
   perl Makefile.PL
   make
   make test
@@ -368,6 +368,9 @@ with the C<--enable-explicitlink> option, which -- sadly -- isn't the default.
 L<http://root.cern.ch>
 
 L<SOOT::API> exposes some of the underlying SOOT-internals.
+
+L<SOOT::Struct> allows for run-time creation/compilation of ROOT/C-level structs.
+Structs created this way are available from Perl.
 
 L<SOOT::App> implements a F<root.exe>/CInt-like front-end
 using L<Devel::REPL>. It is not part of SOOT and is available

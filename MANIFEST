@@ -62,6 +62,19 @@ examples/Math/mathStudent.pl
 examples/Math/principal.pl
 examples/Math/rolke.pl
 examples/Math/vavilov.pl
+inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder.pm
+inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Base.pm
+inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/aix.pm
+inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/cygwin.pm
+inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/darwin.pm
+inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/dec_osf.pm
+inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/os2.pm
+inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/Unix.pm
+inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/VMS.pm
+inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/Windows.pm
+inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/Windows/BCC.pm
+inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/Windows/GCC.pm
+inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/Windows/MSVC.pm
 inc/inc_ExtUtils-ParseXS/ExtUtils/ParseXS.pm
 inc/inc_ExtUtils-Typemap/ExtUtils/Typemap.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp.pm
@@ -137,11 +150,13 @@ lib/SOOT/Examples/Graph.pod
 lib/SOOT/Examples/Hist.pod
 lib/SOOT/Examples/Images.pod
 lib/SOOT/Examples/Math.pod
+lib/SOOT/Struct.pm
 lib/TArray.pm
 lib/TObject.pm
 LICENSE
 MANIFEST			This list of files
 MANIFEST.SKIP
+META.yml
 perlobject.map
 ppport.h
 README
@@ -160,6 +175,16 @@ ROOT_XSP/TGraphErrors.xsp
 ROOT_XSP/TH1.xsp
 ROOT_XSP/TSystem.xsp
 ROOTIncludes.h
+RunTimeXS/MurmurHashNeutral2.h
+RunTimeXS/SOOT_RTXS.cc
+RunTimeXS/SOOT_RTXS.h
+RunTimeXS/SOOT_RTXS.xs
+RunTimeXS/SOOT_RTXS_array.xs
+RunTimeXS/SOOT_RTXS_ExternalXSUBs.h
+RunTimeXS/SOOT_RTXS_hash_table.cc
+RunTimeXS/SOOT_RTXS_hash_table.h
+RunTimeXS/SOOT_RTXS_macros.h
+RunTimeXS/SOOT_RTXS_scalar.xs
 SOOT.xs
 src/ClassGenerator.cc
 src/ClassGenerator.h
@@ -167,6 +192,8 @@ src/ClassIterator.cc
 src/ClassIterator.h
 src/CPerlTypeConversion.cc
 src/CPerlTypeConversion.h
+src/DataMemberAccess.cc
+src/DataMemberAccess.h
 src/ExternalXSUBs.h
 src/PerlCTypeConversion.cc
 src/PerlCTypeConversion.h
@@ -187,6 +214,7 @@ t/020types.t
 t/025cproto.t
 t/030tarray.t
 t/035equality.t
+t/100Struct.t
 TODO
 typemap.xsp
 XS/ClassIterator.xsp
@@ -196,4 +224,3 @@ XS/TObject.xs
 xt/800SimpleDraw.pl
 xt/900leak.t
 xt/manualCTest/test.cc
-META.yml

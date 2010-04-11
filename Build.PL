@@ -26,8 +26,7 @@ push(@flags,
   '-xc++',
   '-I.',
   '-Isrc',
-#  '-C++', # from Makefile.PL
-#  '-hiertype', # from Makefile.PL
+  '-Wno-unused', # FIXME is this a gccism?
 );
 
 my $rootConfig = defined($userRootConfig) ? $userRootConfig : 'root-config';
@@ -48,6 +47,8 @@ push @flags, split(' ', SOOTBuilder::striprun($rootConfig, '--cflags')),
               ? ('-I'.File::Spec->catdir($ENV{ROOTSYS}, 'include'),
                  '-I'.File::Spec->catdir($ENV{ROOTSYS}, 'include', 'root'))
               : ());
+push @flags, '-IRunTimeXS';
+
 push @libs, map { split(' ', $_) }
              ($Config::Config{lddlflags},
               SOOTBuilder::striprun($rootConfig, '--ldflags'),
@@ -71,7 +72,7 @@ my $builder = SOOTBuilder->new(
   #create_makefile_pl    => 'passthrough',
 
   # Location of our special C and XS source files
-  c_source => 'src',
+  c_source => ['src', 'RunTimeXS'],
   xs_files => {
     'SOOT.xs' => 'lib/SOOT.xs'
   },
@@ -89,6 +90,9 @@ my $builder = SOOTBuilder->new(
     'warnings'              => '0', # core as of 5.008
     'strict'                => '0', # core as of 5.008
   },
+#  configure_requires => {
+#    Module::Build => '0.3605', # bundled!?
+#  },
   build_requires => {
     # For the XS build process
     'ExtUtils::XSpp'        => '0.07',
@@ -109,6 +113,11 @@ my $builder = SOOTBuilder->new(
       repository   => 'git://github.com/tsee/SOOT.git',
       bugtracker   => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=SOOT',
       license      => 'http://www.opensource.org/licenses/gpl-2.0.php',
+    },
+    no_index => {
+      directory => [
+        qw(buildtools src t ROOT_XSP xt XS inc examples)
+      ],
     },
   },
 );

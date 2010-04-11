@@ -6,6 +6,7 @@
 
 #include "PerlCTypeConversion.h"
 #include "CPerlTypeConversion.h"
+#include "DataMemberAccess.h"
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -201,9 +202,16 @@ namespace SOOT {
     }
     FindMethodPrototype(theClass, mInfo, methName, argTypes, cproto, offset, nTObjects, (perlCallReceiver == NULL ? true : false), constructor);
 
-    if (!mInfo->IsValid() || !mInfo->Name()) {
+    if (!mInfo->IsValid() || !mInfo->Name()) { // check for data members or croak
       delete mInfo;
-      CroakOnInvalidCall(aTHX_ className, methName, c, cproto, false); // FIXME cproto may have been mangled by FindMethodPrototype
+      bool foundDataMember = false;
+      SV* retval = &PL_sv_undef;
+      // If we have a $obj->Something() or $obj->Something($value), try to find a data member
+      if (!constructor && perlCallReceiver != NULL && cproto.size() > 0 && cproto.size() < 3)
+        foundDataMember = FindDataMember(aTHX_ c, methName, cproto, nTObjects, retval, perlCallReceiver, args); // FIXME cproto may have been mangled by FindMethodPrototype
+      if (!foundDataMember)
+        CroakOnInvalidCall(aTHX_ className, methName, c, cproto, false); // FIXME cproto may have been mangled by FindMethodPrototype
+      return retval;
     }
 
     vector<void*> needsCleanup;
@@ -240,6 +248,30 @@ namespace SOOT {
 
     //cout << "RETVAL INFO FOR " <<  methName << ": cproto=" << retTypeStr << " mytype=" << gBasicTypeStrings[retType] << endl;
     return ProcessReturnValue(aTHX_ retType, addr, addrD, retTypeStr, constructor, needsCleanup);
+  }
+
+
+  bool
+  FindDataMember(pTHX_ TClass* theClass, const char* methName,
+                 const std::vector<std::string>& cproto,
+                 const unsigned int nTObjects, SV*& retval,
+                 SV* perlCallReceiver, AV* args)
+  {
+    TDataMember* dm = theClass->GetDataMember(methName);
+    // return if there is no such data member or of it isn't public
+    if (!dm || !(dm->Property() & kIsPublic))
+      return false;
+
+    void* objAddr = (void*) SOOT::LobotomizeObject(aTHX_ perlCallReceiver);
+
+    bool isGetter = cproto.size() == 1;
+    if (isGetter)
+      retval = SOOT::InstallDataMemberToPerlConverter(aTHX_ theClass, methName, dm, objAddr, NULL);
+    else {
+      SV* argument = *av_fetch(args, 1, 0);
+      SOOT::InstallDataMemberToPerlConverter(aTHX_ theClass, methName, dm, objAddr, argument);
+    }
+    return true;
   }
 
 
@@ -294,7 +326,7 @@ namespace SOOT {
         CroakOnInvalidCall(aTHX_ theClass.Name(), methName, &c, cproto, true);
     } else {
       delete mInfo;
-      mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset)); // FIXME valgrind thinks this might leak
+      mInfo = new G__MethodInfo(theClass.GetMethod(methName, cprotoStr, &offset));
     }
     if (freeCProtoStr)
       free(cprotoStr);
