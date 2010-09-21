@@ -7,14 +7,15 @@ build_requires:
   ExtUtils::Constant: 0
   ExtUtils::ParseXS: 0
   ExtUtils::Typemap: 0.04
-  ExtUtils::XSpp: 0.07
+  ExtUtils::XSpp: 0.10_02
   File::Path: 0
   File::Spec: 0
 configure_requires:
   Alien::ROOT: v5.26.0.1
+  ExtUtils::CppGuess: 0.01
   Module::Build: 0.3605
 dynamic_config: 1
-generated_by: 'Module::Build version 0.3605'
+generated_by: 'Module::Build version 0.3607'
 license: gpl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -33,7 +34,7 @@ no_index:
 provides:
   SOOT:
     file: lib/SOOT.pm
-    version: 0.09
+    version: 0.10
   SOOT::API:
     file: lib/SOOT/API.pm
   SOOT::Struct:
@@ -53,4 +54,4 @@ resources:
   bugtracker: http://rt.cpan.org/NoAuth/Bugs.html?Dist=SOOT
   license: http://www.opensource.org/licenses/gpl-2.0.php
   repository: git://github.com/tsee/SOOT.git
-version: 0.09
+version: 0.10

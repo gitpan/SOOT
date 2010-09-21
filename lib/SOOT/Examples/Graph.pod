@@ -84,7 +84,7 @@ This is a listing of all SOOT examples for Graph.
   sub DrawSmooth {
      my ($pad, $title, $xt, $yt) = @_;
      $vC1->cd($pad);
-     my $vFrame = $vC1->DrawFrame(0,0,15,150); # FIXME apparently DrawFrame returns "G__p2memfunc"...
+     my $vFrame = $vC1->DrawFrame(0,0,15,150);
      $vFrame->SetTitle($title);
      $vFrame->SetTitleSize(0.2);
      $vFrame->SetXTitle($xt);
@@ -383,7 +383,6 @@ This is a listing of all SOOT examples for Graph.
   use SOOT ':all';
   use File::Spec;
   
-  my @obj; # FIXME hack to keep objects around (remove after fixing object-ownership)
   # Macro to test scatterplot smoothers: ksmooth, lowess, supsmu
   # as described in:
   #    Modern Applied Statistics with S-Plus, 3rd Edition
@@ -394,8 +393,9 @@ This is a listing of all SOOT examples for Graph.
   # for a simulated motorcycle accident, taken from Silverman (1985).
   
   # data taken from R library MASS: mcycle.txt
-  my $inFile = File::Spec->catfile($ENV{ROOTSYS},
-                                   qw(share doc root tutorials graphs motorcycle.dat));
+  my $inFile = shift
+               || File::Spec->catfile($ENV{ROOTSYS},
+                                      qw(share doc root tutorials graphs motorcycle.dat));
   
   # read file and add to fit object
   my $x = [];
@@ -450,7 +450,7 @@ This is a listing of all SOOT examples for Graph.
   sub DrawSmooth {
      my ($can, $grin, $grout, $pad, $title, $xt, $yt) = @_;
      $can->cd($pad);
-     my $vFrame = $can->DrawFrame(0,-130,60,70); # FIXME this doesn't return a vFrame but a "G__p2memfunc"
+     my $vFrame = $can->DrawFrame(0,-130,60,70);
      $vFrame->SetTitle($title);
      $vFrame->SetTitleSize(0.2);
      $vFrame->SetXTitle($xt);
@@ -461,7 +461,7 @@ This is a listing of all SOOT examples for Graph.
      $grout->SetMarkerSize(0.5);
      $grout->DrawClone("P");
      $grout->DrawClone("LPX");
-     push @obj, $vFrame;
+     $vFrame->keep;
   }
   
   $gApplication->Run;
@@ -491,7 +491,7 @@ This is a listing of all SOOT examples for Graph.
   my $gr1 = TGraphErrors->new($n1,$x1,$y1,$ex1,$ey1);
   $gr1->SetMarkerColor(kBlue);
   $gr1->SetMarkerStyle(21);
-  $gr1->Fit("pol6","q"); # FIXME Unhandled return type 'TFitResultPtr' (SOOT type 'INVALID')
+  $gr1->Fit("pol6","q");
   $mg->Add($gr1);
   
   # create second graph

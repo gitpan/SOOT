@@ -62,6 +62,7 @@ examples/Math/mathStudent.pl
 examples/Math/principal.pl
 examples/Math/rolke.pl
 examples/Math/vavilov.pl
+inc/inc_Alien-ROOT/Alien/ROOT.pm
 inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder.pm
 inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Base.pm
 inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/aix.pm
@@ -75,6 +76,7 @@ inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/Windows.pm
 inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/Windows/BCC.pm
 inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/Windows/GCC.pm
 inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/Windows/MSVC.pm
+inc/inc_ExtUtils-CppGuess/ExtUtils/CppGuess.pm
 inc/inc_ExtUtils-ParseXS/ExtUtils/ParseXS.pm
 inc/inc_ExtUtils-Typemap/ExtUtils/Typemap.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp.pm
@@ -97,11 +99,15 @@ inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/Class.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/Comment.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/Constructor.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/Destructor.pm
+inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/Enum.pm
+inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/EnumValue.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/File.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/Function.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/Method.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/Module.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/Package.pm
+inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/PercAny.pm
+inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/Preprocessor.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/Raw.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/Type.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Parser.pm
@@ -214,6 +220,7 @@ t/020types.t
 t/025cproto.t
 t/030tarray.t
 t/035equality.t
+t/045tf1.t
 t/100Struct.t
 TODO
 typemap.xsp

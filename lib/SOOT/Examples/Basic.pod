@@ -15,146 +15,143 @@ This is a listing of all SOOT examples for Basic.
   use strict;
   use warnings;
   use SOOT ':all';
+  $gApplication->AsyncRun;
   
-  # Note: the ->keep calls are workarounds for the stricter
-  # garbage colleciont of SOOT to keep the underlying ROOT objects around
-  sub _analyze {
-     $gROOT->Reset();
-     my $c1 = TCanvas->new("c1","Analyze.mac",620,790)->keep;
-     $c1->Range(-1,0,19,30);
-     my $pl1 = TPaveLabel->new(0,27,3.5,29,"Analyze")->keep;
-     $pl1->SetFillColor(42);
-     $pl1->Draw();
+  $gROOT->Reset();
+  my $c1 = TCanvas->new("c1","Analyze.mac",620,790);
+  $c1->Range(-1,0,19,30);
+  my $pl1 = TPaveLabel->new(0,27,3.5,29,"Analyze");
+  $pl1->SetFillColor(42);
+  $pl1->Draw();
   
-     my $pt1 = TPaveText->new(0,22.8,4,25.2)->keep;
-     my $t1  = $pt1->AddText("Parenthesis matching");
-     my $t2  = $pt1->AddText("Remove unnecessary");
-     my $t2a = $pt1->AddText("parenthesis");
-     $pt1->Draw();
+  my $pt1 = TPaveText->new(0,22.8,4,25.2);
+  my $t1  = $pt1->AddText("Parenthesis matching");
+  my $t2  = $pt1->AddText("Remove unnecessary");
+  my $t2a = $pt1->AddText("parenthesis");
+  $pt1->Draw();
   
-     my $pt2 = TPaveText->new(6,23,10,25)->keep;
-     my $t3  = $pt2->AddText("break of");
-     my $t3a = $pt2->AddText("Analyze");
-     $pt2->Draw();
+  my $pt2 = TPaveText->new(6,23,10,25);
+  my $t3  = $pt2->AddText("break of");
+  my $t3a = $pt2->AddText("Analyze");
+  $pt2->Draw();
   
-     my $pt3 = TPaveText->new(0,19,4,21)->keep;
-     my $t4  = $pt3->AddText("look for simple");
-     my $t5  = $pt3->AddText("operators");
-     $pt3->Draw();
+  my $pt3 = TPaveText->new(0,19,4,21);
+  my $t4  = $pt3->AddText("look for simple");
+  my $t5  = $pt3->AddText("operators");
+  $pt3->Draw();
   
-     my $pt4 = TPaveText->new(0,15,4,17)->keep;
-     my $t6  = $pt4->AddText("look for an already");
-     my $t7  = $pt4->AddText("defined expression");
-     $pt4->Draw();
+  my $pt4 = TPaveText->new(0,15,4,17);
+  my $t6  = $pt4->AddText("look for an already");
+  my $t7  = $pt4->AddText("defined expression");
+  $pt4->Draw();
   
-     my $pt5 = TPaveText->new(0,11,4,13)->keep;
-     my $t8  = $pt5->AddText("look for usual");
-     my $t9  = $pt5->AddText("functions :cos sin ..");
-     $pt5->Draw();
+  my $pt5 = TPaveText->new(0,11,4,13);
+  my $t8  = $pt5->AddText("look for usual");
+  my $t9  = $pt5->AddText("functions :cos sin ..");
+  $pt5->Draw();
   
-     my $pt6 = TPaveText->new(0,7,4,9)->keep;
-     my $t10 = $pt6->AddText("look for a");
-     my $t11 = $pt6->AddText("numeric value");
-     $pt6->Draw();
+  my $pt6 = TPaveText->new(0,7,4,9);
+  my $t10 = $pt6->AddText("look for a");
+  my $t11 = $pt6->AddText("numeric value");
+  $pt6->Draw();
   
-     my $pt7 = TPaveText->new(6,18.5,10,21.5)->keep;
-     my $t12 = $pt7->AddText("Analyze left and");
-     my $t13 = $pt7->AddText("right part of");
-     my $t14 = $pt7->AddText("the expression");
-     $pt7->Draw();
+  my $pt7 = TPaveText->new(6,18.5,10,21.5);
+  my $t12 = $pt7->AddText("Analyze left and");
+  my $t13 = $pt7->AddText("right part of");
+  my $t14 = $pt7->AddText("the expression");
+  $pt7->Draw();
   
-     my $pt8 = TPaveText->new(6,15,10,17)->keep;
-     my $t15 = $pt8->AddText("Replace expression");
-     $pt8->Draw();
+  my $pt8 = TPaveText->new(6,15,10,17);
+  my $t15 = $pt8->AddText("Replace expression");
+  $pt8->Draw();
   
-     my $pt9 = TPaveText->new(6,11,10,13)->keep;
-     my $t16 = $pt9->AddText("Analyze");
-     $pt9->SetFillColor(42);
-     $pt9->Draw();
+  my $pt9 = TPaveText->new(6,11,10,13);
+  my $t16 = $pt9->AddText("Analyze");
+  $pt9->SetFillColor(42);
+  $pt9->Draw();
   
-     my $pt10 = TPaveText->new(6,7,10,9)->keep;
-     my $t17  = $pt10->AddText("Error");
-     my $t18  = $pt10->AddText("Break of Analyze");
-     $pt10->Draw();
+  my $pt10 = TPaveText->new(6,7,10,9);
+  my $t17  = $pt10->AddText("Error");
+  my $t18  = $pt10->AddText("Break of Analyze");
+  $pt10->Draw();
   
-     my $pt11 = TPaveText->new(14,22,17,24)->keep;
-     $pt11->SetFillColor(42);
-     my $t19  = $pt11->AddText("Analyze");
-     my $t19a = $pt11->AddText("Left");
-     $pt11->Draw();
+  my $pt11 = TPaveText->new(14,22,17,24);
+  $pt11->SetFillColor(42);
+  my $t19  = $pt11->AddText("Analyze");
+  my $t19a = $pt11->AddText("Left");
+  $pt11->Draw();
   
-     my $pt12 = TPaveText->new(14,19,17,21)->keep;
-     $pt12->SetFillColor(42);
-     my $t20  = $pt12->AddText("Analyze");
-     my $t20a = $pt12->AddText("Right");
-     $pt12->Draw();
+  my $pt12 = TPaveText->new(14,19,17,21);
+  $pt12->SetFillColor(42);
+  my $t20  = $pt12->AddText("Analyze");
+  my $t20a = $pt12->AddText("Right");
+  $pt12->Draw();
   
-     my $pt13 = TPaveText->new(14,15,18,18)->keep;
-     my $t21  = $pt13->AddText("StackNumber++");
-     my $t22  = $pt13->AddText("operator[StackNumber]");
-     my $t23  = $pt13->AddText("= operator found");
-     $pt13->Draw();
+  my $pt13 = TPaveText->new(14,15,18,18);
+  my $t21  = $pt13->AddText("StackNumber++");
+  my $t22  = $pt13->AddText("operator[StackNumber]");
+  my $t23  = $pt13->AddText("= operator found");
+  $pt13->Draw();
   
-     my $pt14 = TPaveText->new(12,10.8,17,13.2)->keep;
-     my $t24  = $pt14->AddText("StackNumber++");
-     my $t25  = $pt14->AddText("operator[StackNumber]");
-     my $t26  = $pt14->AddText("= function found");
-     $pt14->Draw();
+  my $pt14 = TPaveText->new(12,10.8,17,13.2);
+  my $t24  = $pt14->AddText("StackNumber++");
+  my $t25  = $pt14->AddText("operator[StackNumber]");
+  my $t26  = $pt14->AddText("= function found");
+  $pt14->Draw();
   
-     my $pt15 = TPaveText->new(6,7,10,9)->keep;
-     my $t27  = $pt15->AddText("Error");
-     my $t28  = $pt15->AddText("break of Analyze");
-     $pt15->Draw();
+  my $pt15 = TPaveText->new(6,7,10,9);
+  my $t27  = $pt15->AddText("Error");
+  my $t28  = $pt15->AddText("break of Analyze");
+  $pt15->Draw();
   
-     my $pt16 = TPaveText->new(0,2,7,5)->keep;
-     my $t29 = $pt16->AddText("StackNumber++");
-     my $t30 = $pt16->AddText("operator[StackNumber] = 0");
-     my $t31 = $pt16->AddText("value[StackNumber] = value found");
-     $pt16->Draw();
+  my $pt16 = TPaveText->new(0,2,7,5);
+  my $t29 = $pt16->AddText("StackNumber++");
+  my $t30 = $pt16->AddText("operator[StackNumber] = 0");
+  my $t31 = $pt16->AddText("value[StackNumber] = value found");
+  $pt16->Draw();
   
-     my $ar = TArrow->new(2,27,2,25.4,0.012,"|>")->keep;
-     $ar->SetFillColor(1);
-     $ar->Draw();
-     $ar->DrawArrow(2,22.8,2,21.2,0.012,"|>");
-     $ar->DrawArrow(2,19,2,17.2,0.012,"|>");
-     $ar->DrawArrow(2,15,2,13.2,0.012,"|>");
-     $ar->DrawArrow(2,11,2, 9.2,0.012,"|>");
-     $ar->DrawArrow(2, 7,2, 5.2,0.012,"|>");
-     $ar->DrawArrow(4,24,6,24,0.012,"|>");
-     $ar->DrawArrow(4,20,6,20,0.012,"|>");
-     $ar->DrawArrow(4,16,6,16,0.012,"|>");
-     $ar->DrawArrow(4,12,6,12,0.012,"|>");
-     $ar->DrawArrow(4, 8,6, 8,0.012,"|>");
-     $ar->DrawArrow(10,20,14,20,0.012,"|>");
-     $ar->DrawArrow(12,23,14,23,0.012,"|>");
-     $ar->DrawArrow(12,16.5,14,16.5,0.012,"|>");
-     $ar->DrawArrow(10,12,12,12,0.012,"|>");
+  my $ar = TArrow->new(2,27,2,25.4,0.012,"|>");
+  $ar->SetFillColor(1);
+  $ar->Draw();
+  $ar->DrawArrow(2,22.8,2,21.2,0.012,"|>");
+  $ar->DrawArrow(2,19,2,17.2,0.012,"|>");
+  $ar->DrawArrow(2,15,2,13.2,0.012,"|>");
+  $ar->DrawArrow(2,11,2, 9.2,0.012,"|>");
+  $ar->DrawArrow(2, 7,2, 5.2,0.012,"|>");
+  $ar->DrawArrow(4,24,6,24,0.012,"|>");
+  $ar->DrawArrow(4,20,6,20,0.012,"|>");
+  $ar->DrawArrow(4,16,6,16,0.012,"|>");
+  $ar->DrawArrow(4,12,6,12,0.012,"|>");
+  $ar->DrawArrow(4, 8,6, 8,0.012,"|>");
+  $ar->DrawArrow(10,20,14,20,0.012,"|>");
+  $ar->DrawArrow(12,23,14,23,0.012,"|>");
+  $ar->DrawArrow(12,16.5,14,16.5,0.012,"|>");
+  $ar->DrawArrow(10,12,12,12,0.012,"|>");
   
-     my $ta = TText->new(2.2,22.2,"err = 0")->keep;
-     $ta->SetTextFont(71);
-     $ta->SetTextSize(0.015);
-     $ta->SetTextColor(4);
-     $ta->SetTextAlign(12);
-     $ta->Draw();
-     $ta->DrawText(2.2,18.2,"not found");
-     $ta->DrawText(2.2,6.2,"found");
+  my $ta = TText->new(2.2,22.2,"err = 0");
+  $ta->SetTextFont(71);
+  $ta->SetTextSize(0.015);
+  $ta->SetTextColor(4);
+  $ta->SetTextAlign(12);
+  $ta->Draw();
+  $ta->DrawText(2.2,18.2,"not found");
+  $ta->DrawText(2.2,6.2,"found");
   
-     my $tb = TText->new(4.2,24.1,"err != 0")->keep;
-     $tb->SetTextFont(71);
-     $tb->SetTextSize(0.015);
-     $tb->SetTextColor(4);
-     $tb->SetTextAlign(11);
-     $tb->Draw();
-     $tb->DrawText(4.2,20.1,"found");
-     $tb->DrawText(4.2,16.1,"found");
-     $tb->DrawText(4.2,12.1,"found");
-     $tb->DrawText(4.2, 8.1,"not found");
-     my $l1 = TLine->new(12,16.5,12,23)->keep;
-     $l1->Draw();
-  }
+  my $tb = TText->new(4.2,24.1,"err != 0");
+  $tb->SetTextFont(71);
+  $tb->SetTextSize(0.015);
+  $tb->SetTextColor(4);
+  $tb->SetTextAlign(11);
+  $tb->Draw();
+  $tb->DrawText(4.2,20.1,"found");
+  $tb->DrawText(4.2,16.1,"found");
+  $tb->DrawText(4.2,12.1,"found");
+  $tb->DrawText(4.2, 8.1,"not found");
+  my $l1 = TLine->new(12,16.5,12,23);
+  $l1->Draw();
   
-  _analyze();
-  $gApplication->Run;
+  $c1->Update();
+  $gApplication->wait;
   
 
 
@@ -1386,71 +1383,39 @@ This is a listing of all SOOT examples for Basic.
      $l->DrawLatex(0.495, 0.95, "Upper case");
      $l->DrawLatex(0.825, 0.95, "Variations");
   
-     # FIXME This is the way you would do it in C, not in Perl. We can do better than this.
      # Draw the lower case letters
      $l->SetTextAlign(12);
      my ($y, $x1, $x2);
      $y = 0.90; $x1 = 0.07; $x2 = $x1+0.2;
-                   $l->DrawLatex($x1, $y, "alpha : ")   ; $l->DrawLatex($x2, $y, "#alpha");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "beta : ")    ; $l->DrawLatex($x2, $y, "#beta");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "gamma : ")   ; $l->DrawLatex($x2, $y, "#gamma");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "delta : ")   ; $l->DrawLatex($x2, $y, "#delta");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "epsilon : ") ; $l->DrawLatex($x2, $y, "#epsilon");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "zeta : ")    ; $l->DrawLatex($x2, $y, "#zeta");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "eta : ")     ; $l->DrawLatex($x2, $y, "#eta");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "theta : ")   ; $l->DrawLatex($x2, $y, "#theta");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "iota : ")    ; $l->DrawLatex($x2, $y, "#iota");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "kappa : ")   ; $l->DrawLatex($x2, $y, "#kappa");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "lambda : ")  ; $l->DrawLatex($x2, $y, "#lambda");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "mu : ")      ; $l->DrawLatex($x2, $y, "#mu");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "nu : ")      ; $l->DrawLatex($x2, $y, "#nu");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "xi : ")      ; $l->DrawLatex($x2, $y, "#xi");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "omicron : ") ; $l->DrawLatex($x2, $y, "#omicron");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "pi : ")      ; $l->DrawLatex($x2, $y, "#pi");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "rho : ")     ; $l->DrawLatex($x2, $y, "#rho");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "sigma : ")   ; $l->DrawLatex($x2, $y, "#sigma");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "tau : ")     ; $l->DrawLatex($x2, $y, "#tau");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "upsilon : ") ; $l->DrawLatex($x2, $y, "#upsilon");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "phi : ")     ; $l->DrawLatex($x2, $y, "#phi");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "chi : ")     ; $l->DrawLatex($x2, $y, "#chi");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "psi : ")     ; $l->DrawLatex($x2, $y, "#psi");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "omega : ")   ; $l->DrawLatex($x2, $y, "#omega");
+     my @letters = qw(
+       alpha beta gamma delta epsilon zeta eta
+       theta iota kappa lambda mu nu xi omicron
+       pi rho sigma tau upsilon phi chi psi omega
+     );
+     foreach my $letter (@letters) {
+       $l->DrawLatex($x1, $y, "$letter : ");
+       $l->DrawLatex($x2, $y, "#$letter");
+       $y -= 0.0375;
+     }
   
      # Draw the upper case letters
      $y = 0.90; $x1 = 0.40; $x2 = $x1+0.2;
-                   $l->DrawLatex($x1, $y, "Alpha : ")   ; $l->DrawLatex($x2, $y, "#Alpha");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Beta : ")    ; $l->DrawLatex($x2, $y, "#Beta");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Gamma : ")   ; $l->DrawLatex($x2, $y, "#Gamma");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Delta : ")   ; $l->DrawLatex($x2, $y, "#Delta");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Epsilon : ") ; $l->DrawLatex($x2, $y, "#Epsilon");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Zeta : ")    ; $l->DrawLatex($x2, $y, "#Zeta");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Eta : ")     ; $l->DrawLatex($x2, $y, "#Eta");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Theta : ")   ; $l->DrawLatex($x2, $y, "#Theta");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Iota : ")    ; $l->DrawLatex($x2, $y, "#Iota");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Kappa : ")   ; $l->DrawLatex($x2, $y, "#Kappa");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Lambda : ")  ; $l->DrawLatex($x2, $y, "#Lambda");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Mu : ")      ; $l->DrawLatex($x2, $y, "#Mu");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Nu : ")      ; $l->DrawLatex($x2, $y, "#Nu");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Xi : ")      ; $l->DrawLatex($x2, $y, "#Xi");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Omicron : ") ; $l->DrawLatex($x2, $y, "#Omicron");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Pi : ")      ; $l->DrawLatex($x2, $y, "#Pi");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Rho : ")     ; $l->DrawLatex($x2, $y, "#Rho");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Sigma : ")   ; $l->DrawLatex($x2, $y, "#Sigma");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Tau : ")     ; $l->DrawLatex($x2, $y, "#Tau");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Upsilon : ") ; $l->DrawLatex($x2, $y, "#Upsilon");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Phi : ")     ; $l->DrawLatex($x2, $y, "#Phi");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Chi : ")     ; $l->DrawLatex($x2, $y, "#Chi");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Psi : ")     ; $l->DrawLatex($x2, $y, "#Psi");
-     $y -= 0.0375 ; $l->DrawLatex($x1, $y, "Omega : ")   ; $l->DrawLatex($x2, $y, "#Omega");
+     foreach my $letter (map {ucfirst $_} @letters) {
+       $l->DrawLatex($x1, $y, "$letter : ");
+       $l->DrawLatex($x2, $y, "#$letter");
+       $y -= 0.0375;
+     }
   
      # Draw the variations
+     my @letterVariations  = qw(varepsilon vartheta varsigma varUpsilon varphi varomega);
+     my @letterVariationsY = (0.7500, 0.6375, 0.2625, 0.1875, 0.1500, 0.0375);
      $x1 = 0.73; $x2 = $x1+0.2;
-     $y = 0.7500 ; $l->DrawLatex($x1, $y, "varepsilon : ") ; $l->DrawLatex($x2, $y, "#varepsilon");
-     $y = 0.6375 ; $l->DrawLatex($x1, $y, "vartheta : ")   ; $l->DrawLatex($x2, $y, "#vartheta");
-     $y = 0.2625 ; $l->DrawLatex($x1, $y, "varsigma : ")   ; $l->DrawLatex($x2, $y, "#varsigma");
-     $y = 0.1875 ; $l->DrawLatex($x1, $y, "varUpsilon : ") ; $l->DrawLatex($x2, $y, "#varUpsilon");
-     $y = 0.1500 ; $l->DrawLatex($x1, $y, "varphi : ")     ; $l->DrawLatex($x2, $y, "#varphi");
-     $y = 0.0375 ; $l->DrawLatex($x1, $y, "varomega : ")   ; $l->DrawLatex($x2, $y, "#varomega");
+     foreach my $i (0..$#letterVariations) {
+       my $letter = $letterVariations[$i];
+       my $y      = $letterVariationsY[$i];
+       $l->DrawLatex($x1, $y, "$letter : ");
+       $l->DrawLatex($x2, $y, "#$letter");
+     }
   
      # Save the picture in various formats
      $c1->Print("greek.ps");
@@ -1467,127 +1432,126 @@ This is a listing of all SOOT examples for Basic.
 
 =head2 logscale.pl
 
+  use strict;
+  use warnings;
   use SOOT ':all';
   
-  sub _logscale {
-     $gROOT->Reset();
-     $c1 = TCanvas->new("c1","Various options on LOG scales plots",0,0,700,900);
-     $c1->SetFillColor(30);
+  my $c1 = TCanvas->new("c1","Various options on LOG scales plots",0,0,700,900);
+  $c1->SetFillColor(30);
   
-     $pad1 = TPad->new("pad1","pad1",0.03,0.62,0.50,0.92,32);
-     $pad2 = TPad->new("pad2","pad2",0.51,0.62,0.98,0.92,33);
-     $pad3 = TPad->new("pad3","pad3",0.03,0.02,0.97,0.535,38);
-     $pad1->Draw(); 
-     $pad2->Draw(); 
-     $pad3->Draw();
+  my $pad1 = TPad->new("pad1","pad1",0.03,0.62,0.50,0.92,32);
+  my $pad2 = TPad->new("pad2","pad2",0.51,0.62,0.98,0.92,33);
+  my $pad3 = TPad->new("pad3","pad3",0.03,0.02,0.97,0.535,38);
+  $pad1->Draw(); 
+  $pad2->Draw(); 
+  $pad3->Draw();
   
-     $title = TPaveLabel->new(0.1,0.94,0.9,0.98,"Various options on LOG scales plots");
-     $title->SetFillColor(16);
-     $title->SetTextFont(42);
-     $title->Draw();
+  my $title = TPaveLabel->new(0.1,0.94,0.9,0.98,"Various options on LOG scales plots");
+  $title->SetFillColor(16);
+  $title->SetTextFont(42);
+  $title->Draw();
   
-     $pave = TPaveText->new(0.1,0.55,0.9,0.61);
-     $pave->SetFillColor(42);
-     $pave->SetTextAlign(12);
-     $pave->SetTextFont(42);
-     $pave->AddText("When more Log labels are requested, the overlaping labels are removed");
-     $pave->Draw();
+  my $pave = TPaveText->new(0.1,0.55,0.9,0.61);
+  $pave->SetFillColor(42);
+  $pave->SetTextAlign(12);
+  $pave->SetTextFont(42);
+  $pave->AddText("When more Log labels are requested, the overlaping labels are removed");
+  $pave->Draw();
   
-     $pad1->cd();
-     $pad1->SetLogy();
-     $pad1->SetGridy();
-     $f1 = TF1->new("f1","x*sin(x)*exp(-0.1*x)+15",-10.,10.);
-     $f2 = TF1->new("f2","(sin(x)+cos(x))**5+15",-10.,10.);
-     $f3 = TF1->new("f3","(sin(x)/(x)-x*cos(x))+15",-10.,10.);
-     $f1->SetLineWidth(1); 
-     $f1->SetLineColor(2);
-     $f2->SetLineWidth(1); 
-     $f2->SetLineColor(3);
-     $f3->SetLineWidth(1); 
-     $f3->SetLineColor(4);
-     #f1->SetTitle("");
-     $f1->Draw();
-     $f2->Draw("same");
-     $f3->Draw("same");
-     $f1->GetYaxis()->SetMoreLogLabels(); # FIXME Can't locate object method "SetMoreLogLabels" via package "G__p2memfunc" at examples/Basic/logscale.pl line 43.
-     $pave1 = TPaveText->new(-6,2,6,6);
-     $pave1->SetFillColor(42);
-     $pave1->SetTextAlign(12);
-     $pave1->SetTextFont(42);
-     $pave1->AddText("Log scale along Y axis.");
-     $pave1->AddText("More Log labels requested.");
-     $pave1->Draw();
+  $pad1->cd();
+  $pad1->SetLogy();
+  $pad1->SetGridy();
+  my $f1 = TF1->new("f1","x*sin(x)*exp(-0.1*x)+15",-10.,10.);
+  my $f2 = TF1->new("f2","(sin(x)+cos(x))**5+15",-10.,10.);
+  my $f3 = TF1->new("f3","(sin(x)/(x)-x*cos(x))+15",-10.,10.);
+  $f1->SetLineWidth(1); 
+  $f1->SetLineColor(2);
+  $f2->SetLineWidth(1); 
+  $f2->SetLineColor(3);
+  $f3->SetLineWidth(1); 
+  $f3->SetLineColor(4);
+  #f1->SetTitle("");
+  $f1->Draw();
+  $f2->Draw("same");
+  $f3->Draw("same");
+  $f1->GetYaxis()->SetMoreLogLabels();
+  my $pave1 = TPaveText->new(-6,2,6,6);
+  $pave1->SetFillColor(42);
+  $pave1->SetTextAlign(12);
+  $pave1->SetTextFont(42);
+  $pave1->AddText("Log scale along Y axis.");
+  $pave1->AddText("More Log labels requested.");
+  $pave1->Draw();
   
-     $pad2->cd();
-     $x = new array::Array('d', [200, 300, 400, 500, 600, 650, 700, 710, 900,1000]);
-     $y = new array::Array('d', [200, 1000, 900, 400, 500, 250, 800, 150, 201, 220]);
-     $g_2 = TGraph->new(10,$x,$y);
-     #g_2->SetTitle("");
-     $g_2->Draw("AL*");
-     $g_2->SetMarkerColor(2);
-     $g_2->GetYaxis()->SetMoreLogLabels();
-     $g_2->GetYaxis()->SetNoExponent();
-     $pad2->SetLogy();
-     $g_2->GetXaxis()->SetMoreLogLabels();
-     $pad2->SetLogx();
-     $pad2->SetGridx();
-     $pave2 = TPaveText->new(150,80,500,180);
-     $pave2->SetFillColor(42);
-     $pave2->SetTextFont(42);
-     $pave2->SetTextAlign(12);
-     $pave2->AddText("Log scale along X and Y axis.");
-     $pave2->AddText("More Log labels on both.");
-     $pave2->AddText("No exponent along Y axis.");
-     $pave2->Draw();
+  $pad2->cd();
+  my $x = [200., 300, 400, 500, 600, 650, 700, 710, 900,1000];
+  my $y = [200., 1000, 900, 400, 500, 250, 800, 150, 201, 220];
+  my $g_2 = TGraph->new(10,$x,$y);
+  #g_2->SetTitle("");
+  $g_2->Draw("AL*");
+  $g_2->SetMarkerColor(2);
+  $g_2->GetYaxis()->SetMoreLogLabels();
+  $g_2->GetYaxis()->SetNoExponent();
+  $pad2->SetLogy();
+  $g_2->GetXaxis()->SetMoreLogLabels();
+  $pad2->SetLogx();
+  $pad2->SetGridx();
+  my $pave2 = TPaveText->new(150,80,500,180);
+  $pave2->SetFillColor(42);
+  $pave2->SetTextFont(42);
+  $pave2->SetTextAlign(12);
+  $pave2->AddText("Log scale along X and Y axis.");
+  $pave2->AddText("More Log labels on both.");
+  $pave2->AddText("No exponent along Y axis.");
+  $pave2->Draw();
   
-     $pad3->cd();
-     $pad3->SetGridx();
-     $pad3->SetGridy();
-     $pad3->SetLogy();
-     $pad3->SetLogx();
-     $f4 = TF1->new("f4a","x*sin(x+10)+25",1,21); 
-     $f4->SetLineWidth(1); 
-     $f4->Draw();
-     $f4->SetNpx(200);
-     #f4->SetTitle("");
-     $f4->GetYaxis()->SetMoreLogLabels();
-     $f4->GetXaxis()->SetMoreLogLabels();
-     $f4 = TF1->new("f4b","x*cos(x+10)*sin(x+10)+25",1,21); 
-     $f4->SetLineWidth(1); 
-     $f4->Draw("same");
-     $f4->SetNpx(200);
-     $a = 20;
-     for (my $i=$a; $i>=1; $i--) {
-       $f4 = TF1->new(sprintf("f4b_%d",$i),"x*sin(x+10)*[0]/[1]+25",1,21);
-       $f4->SetParameter(0,$i);
-       $f4->SetParameter(1,$a);
-       $f4->SetNpx(200);
-       $f4->SetLineWidth(1); 
-       $f4->SetLineColor($i+10); 
-       $f4->Draw("same");
-       $f4 = TF1->new(sprintf("f4c_%d",$i),"x*cos(x+10)*sin(x+10)*[0]/[1]+25",1,25);
-       $f4->SetParameter(0,$i);
-       $f4->SetParameter(1,$a);
-       $f4->SetNpx(200);
-       $f4->SetLineWidth(1); 
-       $f4->SetLineColor($i+30); 
-       $f4->Draw("same");
-     }
-     $pave3 = TPaveText->new(1.2,8,9,15);
-     $pave3->SetFillColor(42);
-     $pave3->AddText("Log scale along X and Y axis.");
-     $pave3->SetTextFont(42);
-     $pave3->SetTextAlign(12);
-     $pave3->AddText("More Log labels on both.");
-     $pave3->AddText("The labels have no exponents because they would be 0 or 1");
-     $pave3->Draw();
+  $pad3->cd();
+  $pad3->SetGridx();
+  $pad3->SetGridy();
+  $pad3->SetLogy();
+  $pad3->SetLogx();
+  my $f4 = TF1->new("f4a","x*sin(x+10)+25",1,21); 
+  $f4->SetLineWidth(1); 
+  $f4->Draw();
+  $f4->SetNpx(200);
+  #f4->SetTitle("");
+  $f4->GetYaxis()->SetMoreLogLabels();
+  $f4->GetXaxis()->SetMoreLogLabels();
+  my $f5 = TF1->new("f4b","x*cos(x+10)*sin(x+10)+25",1,21); 
+  $f5->SetLineWidth(1); 
+  $f5->Draw("same");
+  $f5->SetNpx(200);
+  
+  my $max = 20;
+  for my $i (reverse(1..$max)) {
+    my $f = TF1->new(sprintf("f4b_%d",$i),"x*sin(x+10)*[0]/[1]+25",1,21);
+    $f->SetParameter(0,$i);
+    $f->SetParameter(1,$max);
+    $f->SetNpx(200);
+    $f->SetLineWidth(1); 
+    $f->SetLineColor($i+10); 
+    $f->Draw("same");
+    $f->keep;
+    $f = TF1->new(sprintf("f4c_%d",$i),"x*cos(x+10)*sin(x+10)*[0]/[1]+25",1,25);
+    $f->SetParameter(0,$i);
+    $f->SetParameter(1,$max);
+    $f->SetNpx(200);
+    $f->SetLineWidth(1); 
+    $f->SetLineColor($i+30); 
+    $f->Draw("same");
+    $f->keep;
   }
-  
-  _logscale;
+  my $pave3 = TPaveText->new(1.2,8,9,15);
+  $pave3->SetFillColor(42);
+  $pave3->AddText("Log scale along X and Y axis.");
+  $pave3->SetTextFont(42);
+  $pave3->SetTextAlign(12);
+  $pave3->AddText("More Log labels on both.");
+  $pave3->AddText("The labels have no exponents because they would be 0 or 1");
+  $pave3->Draw();
   
   $gApplication->Run;
   
-  __END__
 
 
 
