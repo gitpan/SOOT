@@ -162,7 +162,6 @@ lib/TObject.pm
 LICENSE
 MANIFEST			This list of files
 MANIFEST.SKIP
-META.yml
 perlobject.map
 ppport.h
 README
@@ -231,3 +230,4 @@ XS/TObject.xs
 xt/800SimpleDraw.pl
 xt/900leak.t
 xt/manualCTest/test.cc
+META.yml

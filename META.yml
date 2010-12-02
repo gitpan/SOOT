@@ -34,7 +34,7 @@ no_index:
 provides:
   SOOT:
     file: lib/SOOT.pm
-    version: 0.11
+    version: 0.12
   SOOT::API:
     file: lib/SOOT/API.pm
   SOOT::Struct:
@@ -54,4 +54,4 @@ resources:
   bugtracker: http://rt.cpan.org/NoAuth/Bugs.html?Dist=SOOT
   license: http://www.opensource.org/licenses/gpl-2.0.php
   repository: git://github.com/tsee/SOOT.git
-version: 0.11
+version: 0.12
