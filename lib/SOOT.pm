@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp 'croak';
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use Alien::ROOT;
 use vars '$Alien';
@@ -36,7 +36,7 @@ our %EXPORT_TAGS = (
     $gHistImagePalette $gWebImagePalette
   ) ],
   'constants' => \@SOOT::Constants::Names,
-  'functions' => [qw( Load UpdateClasses )],
+  'functions' => [qw( Load UpdateClasses Run )],
 );
 use vars @{$EXPORT_TAGS{globals}};
 
@@ -70,6 +70,8 @@ sub AUTOLOAD {
     }
     goto &$AUTOLOAD;
 }
+
+sub Run { $SOOT::gApplication->Run() }
 
 sub Load {
   shift if @_ and defined $_[0] and $_[0] eq 'SOOT';
@@ -164,6 +166,7 @@ The list of currently exported functions:
 
   Load(className, className2,...)
   UpdateClasses()
+  Run()
 
 =head1 JUMP-START FOR C++-ROOT USERS
 
@@ -340,6 +343,11 @@ Virtually all ROOT classes should be loaded out of the box.
 This function is only necessary if you load additional
 shared libraries.
 
+=head2 Run
+
+Simple shortcut for C<<$SOOT::gApplication->Run()>>.
+can be called as function or class method.
+
 =head2 UpdateClasses
 
 After loading non-standard shared libraries that provide ROOT-based classes,
@@ -404,7 +412,7 @@ Steffen Mueller, E<lt>smueller@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2010 by Steffen Mueller
+Copyright (C) 2010-2011 by Steffen Mueller
 
 SOOT, the Perl-ROOT wrapper, is free software; you can redistribute it and/or modify
 it under the same terms as ROOT itself, that is, the GNU Lesser General Public License.

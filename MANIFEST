@@ -162,6 +162,7 @@ lib/TObject.pm
 LICENSE
 MANIFEST			This list of files
 MANIFEST.SKIP
+META.yml
 perlobject.map
 ppport.h
 README
@@ -179,6 +180,7 @@ ROOT_XSP/TGraphBentErrors.xsp
 ROOT_XSP/TGraphErrors.xsp
 ROOT_XSP/TH1.xsp
 ROOT_XSP/TSystem.xsp
+ROOT_XSP/TTree.xsp
 ROOTIncludes.h
 RunTimeXS/MurmurHashNeutral2.h
 RunTimeXS/SOOT_RTXS.cc
@@ -230,4 +232,3 @@ XS/TObject.xs
 xt/800SimpleDraw.pl
 xt/900leak.t
 xt/manualCTest/test.cc
-META.yml
