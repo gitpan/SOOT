@@ -1,5 +1,36 @@
 Revision history for Perl extension SOOT.
 
+0.14  Tue Jul 26 18:30 2011
+* New features:
+  - Autocasting.
+    Some methods like Clone() or FindObject() return a TObject*
+    according to ROOT. In practice, these objects will be of types
+    that inherit from TObject but seldomly JUST a TObject.
+    From now in, when returning a ROOT object, SOOT will attempt
+    to auto-cast into the right class instead of relying on the ROOT
+    interface definition to return the correct type.
+    If you would previously do
+      $clone = $th1d->Clone()->as('TH1D');
+      $clone->Draw();
+    you can now get away with
+      $clone = $th1d->Clone;
+      $clone->Draw();
+  - TExec was wrapped to allow CINT and Perl callbacks:
+      my $texec = TExec->new("name", sub { do_something() });
+      $texec->Exec();
+    Same for TPad::AddExec().
+  - !$tobject is now overloaded to DWIM.
+  - Documented more differences to C++/ROOT
+  - Wrapped TRandom::Rannor() (see "perldoc SOOT")
+  - More examples
+
+* Bug fixes:
+  - When the ->Fit method of, say, TGraph returned a TFitResultPtr,
+    SOOT didn't really know how to handle it properly. TFitResultPtr's
+    are now automatically dereferenced into TFitResult objects or
+    become a Perl undef. 
+  - Various fixes to make the build system lazier.
+
 0.13  Wed Mar 23 20:50 2011
 * New features:
   - SOOT can export a convenience Run() function.

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp 'croak';
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 use Alien::ROOT;
 use vars '$Alien';
@@ -33,6 +33,7 @@ our %EXPORT_TAGS = (
     $gApplication $gSystem $gRandom $gROOT
     $gDirectory $gStyle $gPad $gBenchmark
     $gEnv
+    $gVirtualX
     $gHistImagePalette $gWebImagePalette
   ) ],
   'constants' => \@SOOT::Constants::Names,
@@ -160,6 +161,7 @@ The list of currently supported globals is:
   $gApplication $gSystem $gRandom $gROOT
   $gDirectory   $gStyle  $gPad    $gBenchmark
   $gEnv
+  $gVirtualX
   $gHistImagePalette $gWebImagePalette
 
 The list of currently exported functions:
@@ -250,7 +252,7 @@ manually mark objects as being owned by ROOT or SOOT:
   draw_histogram($histogram);
   # $cv is gone, but the TCanvas is held by ROOT.
   # If necessary, you can get it again via $gROOT:
-  my $same_cv = $gROOT->FindObject('cv')->as('TCanvas');
+  my $same_cv = $gROOT->FindObject('cv');
   # ...
   # Later, you can manually delete an object:
   $same_cv->delete; # deletes the UNDERLYING ROOT object, too!
@@ -269,11 +271,13 @@ C<TObject*>. In C++, you would cast it into a C<TCanvas*>:
 
   TCanvas* same_cv = (TCanvas*)gROOT->FindObject('cv');
 
-In the context of SOOT, explicit casting is done with the C<as('Typename')> method:
+In the context of SOOT, explicit casting is usually not necessary. In the
+rare case where it is, it is done with the C<as('Typename')> method:
 
   my $same_cv = $gROOT->FindObject('cv')->as('TCanvas');
 
-C<as('Typename')> returns a copy of the SOOT object it is called on with a new type.
+C<as('Typename')> returns a copy of the SOOT object it is called on with a new type
+(not a copy of the ROOT object, just of the SOOT wrapper).
 Finally, the C<delete()> method forcefully deletes a ROOT object and all of
 its SOOT wrappers. It is possible to use this to crash the program, so beware and
 use it sparingly.
@@ -333,6 +337,39 @@ which is not part of the normal ROOT interface:
 
 C<LoadNUpdate()> will bind any new classes B<if> the library was loaded
 successfully and wasn't loaded before.
+
+=head2 Assorted Differences
+
+A few ROOT classes have been wrapped explicitly in a way that makes them more
+useful from a Perl point of view than simply providing the exact same interface
+as in C++. These are briefly laid out here:
+
+=head3 TArrayD, TArrayF, etc.
+
+The constructors of the C<TArrayX> classes take an array reference
+of values as parameter that is copied into the C<TArray>-object.
+The C<GetArray()> method returns the data as a new array reference:
+
+  my $ary = TArrayD->new([1.3, 2.5]);
+  my $copy = $ary->GetArray(); # $copy is now [1.3, 2.5]
+
+=head3 TRandom
+
+C<TRandom::Rannor()> is called without arguments from Perl and returns two
+random numbers instead of using references.
+
+=head3 TExec
+
+C<TExec> callbacks can handle both CINT callbacks and Perl callbacks:
+
+  my $te = TExec->new("name", "Some::CINT::Callback()");
+  $te->Exec();
+  my $te2 = TExec->new("name2", sub {print "Perl says hi\n"});
+  $te->Exec();
+
+The same applies to the C<TPad::AddExec()> method, but in that case,
+for each C<AddExec> call, we currently leak one C<SV*> pointing to
+the Perl callback function.
 
 =head1 FUNCTIONS
 
@@ -412,7 +449,7 @@ Steffen Mueller, E<lt>smueller@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2010-2011 by Steffen Mueller
+Copyright (C) 2010, 2011 by Steffen Mueller
 
 SOOT, the Perl-ROOT wrapper, is free software; you can redistribute it and/or modify
 it under the same terms as ROOT itself, that is, the GNU Lesser General Public License.

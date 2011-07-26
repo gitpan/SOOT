@@ -115,10 +115,20 @@ namespace SOOT {
         //       char* const* where the *'s aren't all at the end
         if (ptr_level > 0)
           *(ptr - ptr_level) = '\0';
+
         //cout << "Registering object '" << (void*)addr << "' of type '" << typeStrWithoutPtr << "'" << endl;
-        retval = SOOT::RegisterObject(aTHX_ (TObject*)addr, typeStrWithoutPtr);
+        if (ptr-typeStrWithoutPtr >= 13 && strncmp(ptr-14, "TFitResultPtr", 13)) {
+          addr = (long int) ((TFitResultPtr*)addr)->Get();
+        }
+        retval = SOOT::RegisterObject(aTHX_ (TObject*)addr);
+        /* This used to be the following line, but since RegisterObject can ask the object
+         * about its classname, we're doing the cleverer thing that way instead of relying
+         * on the typeStrWithoutPtr which is bound to be the most general class due to
+         * the C++ typing */
+        /* retval = SOOT::RegisterObject(aTHX_ (TObject*)addr, typeStrWithoutPtr); */
+
         // If we're not creating a TObject via a constructor, it's likely not ours to delete
-        if (!isConstructor)
+        if (!isConstructor && retval != &PL_sv_undef)
           SOOT::PreventDestruction(aTHX_ (TObject*)addr);
         if (ptr_level > 0)
           *(ptr - ptr_level) = ' ';

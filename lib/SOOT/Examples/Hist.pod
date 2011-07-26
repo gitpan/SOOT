@@ -10,6 +10,273 @@ This is a listing of all SOOT examples for Hist.
 =head1 EXAMPLES
 
 
+=head2 ContourList.pl
+
+  use strict;
+  use warnings;
+  use SOOT ':all';
+  
+  # Getting Contours From TH2D
+  # Author: Josh de Bever
+  #         CSI Medical Physics Group
+  #         The University of Western Ontario
+  #         London, Ontario, Canada
+  #   Date: Oct. 22, 2004
+  #   Modified by O.Couet (Nov. 26, 2004)
+  #   Converted to Perl by S. Mueller (Jul 22, 2011)
+  
+  ContourList();
+  $gApplication->Run();
+  
+  sub SawTooth {
+    # This function is specific to a sawtooth function with period
+    # WaveLen, symmetric about x = 0, and with amplitude = 1. Each segment
+    # is 1/4 of the wavelength.
+    #
+    #           |
+    #      /\   |
+    #     /  \  |
+    #    /    \ |
+    #   /      \
+    #  /--------\--------/------------
+    #           |\      /
+    #           | \    /
+    #           |  \  /
+    #           |   \/
+    #
+    my ($x, $WaveLen) = @_;
+    my $wl2 = 0.5*$WaveLen;
+    my $wl4 = 0.25*$WaveLen;
+    return -99999999 if $x < -$wl2 or $x > $wl2; # Error X out of bounds
+    if ($x <= -$wl4) {
+      return $x + 2.;
+    } elsif ($x > -$wl4 and $x <= $wl4) {
+      return -$x;
+    } elsif ($x > $wl4 and $x <= $wl2) {
+      return $x - 2.;
+    }
+    die "Should not be reached";
+  }
+  
+  use constant PI => TMath::Pi();
+  sub ContourList {
+    my $c = TCanvas->new("c","Contour List",0,0,600,600)->keep;
+    $c->SetRightMargin(0.15);
+    $c->SetTopMargin(0.15);
+  
+    my ($i, $j);
+  
+    my $nZsamples   = 80;
+    my $nPhiSamples = 80;
+  
+    my $HofZwavelength = 4.0;       # 4 meters
+    my $dZ             =  $HofZwavelength/($nZsamples - 1.);
+    my $dPhi           = 2*PI()/($nPhiSamples - 1.);
+  
+    my (@z, @HofZ, @phi, @FofPhi);
+  
+    # Discretized Z and Phi Values
+    foreach my $i (0 .. $nZsamples) {
+      $z[$i]    = $i*$dZ - $HofZwavelength/2.;
+      $HofZ[$i] = SawTooth($z[$i], $HofZwavelength)
+    }
+  
+    foreach my $i (0.. $nPhiSamples) {
+      $phi[$i]    = $i*$dPhi;
+      $FofPhi[$i] = sin($phi[$i]);
+    }
+     
+    # Create Histogram
+    my $HistStreamFn = TH2D->new(
+      "HstreamFn",
+      "#splitline{Histogram with negative and positive contents. Six contours are defined.}{It is plotted with options CONT LIST to retrieve the contours points in TGraphs}",
+      $nZsamples, $z[0], $z[$#z],
+      $nPhiSamples, $phi[0], $phi[$#phi]
+    )->keep;
+  
+    # Load Histogram Data
+    foreach my $i (0 .. $nZsamples) {
+      foreach my $j (0 .. $nPhiSamples) {
+        $HistStreamFn->SetBinContent($i, $j, $HofZ[$i] * $FofPhi[$j]);
+      }
+    }
+  
+    $gStyle->SetPalette(1);
+    $gStyle->SetOptStat(0);
+    $gStyle->SetTitleW(0.99);
+    $gStyle->SetTitleH(0.08);
+  
+    my @contours = (-.7, -.5, -.1, .1, .4, .8);
+    $HistStreamFn->SetContour(6, \@contours);
+    # Draw contours as filled regions, and Save points
+    $HistStreamFn->Draw("CONT Z LIST");
+    $c->Update(); # Needed to force the plotting and retrieve the contours in TGraphs
+  
+    # Get Contours
+    #my $sp = $gROOT->GetListOfSpecials();
+    my $conts = $gROOT->FindObject("contours");
+  
+    my $nGraphs    = 0;
+    my $TotalConts = 0;
+    
+    if (not defined($conts)) {
+      printf("*** No Contours Were Extracted!\n");
+      return;
+    } else {
+      $TotalConts = $conts->GetSize();
+    }
+  
+    printf("TotalConts = %d\n", $TotalConts);
+  
+    foreach my $i (0 .. $TotalConts-1) {
+      my $contLevel =$conts->At($i);
+      printf("Contour %d has %d Graphs\n", $i, $contLevel->GetSize());
+      $nGraphs += $contLevel->GetSize();
+    }
+  
+    $nGraphs = 0;
+  
+    my $c1 = TCanvas->new("c1","Contour List",610,0,600,600)->keep;
+    $c1->SetTopMargin(0.15);
+    my $hr = TH2F->new("hr",
+      "#splitline{Negative contours are returned first (highest to lowest). Positive contours are returned from}{lowest to highest. On this plot Negative contours are drawn in red and positive contours in blue.}",
+      2, -2., 2., 2, 0., 6.5
+    );
+  
+    $hr->Draw();
+    my $l = TLatex->new;
+    $l->SetTextSize(0.03);
+  
+    foreach my $i (0 .. $TotalConts-1) {
+      my $contLevel = $conts->At($i);
+      my $z0;
+      if ($i<3) { $z0 = $contours[2-$i]; }
+      else      { $z0 = $contours[$i]; }
+      printf("Z-Level Passed in as:  Z = %f\n", $z0);
+  
+      # Get first graph from list on curves on this level
+      my $curv = $contLevel->First();
+      foreach my $j (0 .. $contLevel->GetSize()-1) {
+        my $x0 = $curv->GetX()->[0];
+        my $y0 = $curv->GetY()->[0];
+        if ($z0<0) { $curv->SetLineColor(kRed); }
+        if ($z0>0) { $curv->SetLineColor(kBlue); }
+        $nGraphs++;
+        printf("\tGraph: %d  -- %d Elements\n", $nGraphs, $curv->GetN());
+  
+        # Draw clones of the graphs to avoid deletions in case the 1st
+        # pad is redrawn.
+        my $gc = $curv->Clone()->keep;
+        $gc->Draw("C");
+  
+        my $val = sprintf("%g",$z0);
+           $l->DrawLatex($x0,$y0,$val);
+           $curv = $contLevel->After($curv); # Get Next graph
+        }
+     }
+     $c1->Update();
+     printf("\n\n\tExtracted %d Contours and %d Graphs \n", $TotalConts, $nGraphs );
+     $gStyle->SetTitleW(0.);
+     $gStyle->SetTitleH(0.);
+  }
+
+
+
+=head2 DynamicSlice.pl
+
+  #!/usr/bin/env perl
+  use strict;
+  use warnings;
+  use SOOT qw/:all/;
+  SOOT::Init(0);
+  SOOT::Load('TGX11TTF');
+  
+  DynamicSlice();
+  $gApplication->Run();
+  
+  sub DynamicExec {
+    # Example of function called when a mouse event occurs in a pad.
+    # When moving the mouse in the canvas, a second canvas shows the
+    # projection along X of the bin corresponding to the Y position
+    # of the mouse. The resulting histogram is fitted with a gaussian.
+    # A "dynamic" line shows the current bin position in Y.
+    # This more elaborated example can be used as a starting point
+    # to develop more powerful interactive applications exploiting CINT
+    # as a development engine.
+    #
+    # Author:  Rene Brun
+     
+    my $select = $gPad->GetSelected();
+    return if !defined $select;
+    $gPad->SetUniqueID(0), return if !$select->InheritsFrom(TH2::Class());
+    my $h = $select->as('TH2');
+    $gPad->GetCanvas()->FeedbackMode(kTRUE);
+  
+    # erase old position and draw a line at current position
+    my $pyold = $gPad->GetUniqueID();
+    my $px = $gPad->GetEventX();
+    my $py = $gPad->GetEventY();
+    my $uxmin = $gPad->GetUxmin();
+    my $uxmax = $gPad->GetUxmax();
+    my $pxmin = $gPad->XtoAbsPixel($uxmin);
+    my $pxmax = $gPad->XtoAbsPixel($uxmax);
+    if ($pyold) {
+      $gVirtualX->DrawLine($pxmin, $pyold, $pxmax, $pyold);
+    }
+    $gVirtualX->DrawLine($pxmin, $py, $pxmax, $py);
+    $gPad->SetUniqueID($py);
+    my $upy = $gPad->AbsPixeltoY($py);
+    my $y = $gPad->PadtoY($upy);
+  
+    # create or set the new canvas c2
+    my $padsav = $gPad;
+    my $c2 = $gROOT->FindObject("c2");
+    if (defined $c2) {
+      #$c2->GetPrimitive("Projection")->delete;
+    }
+    else {
+      $c2 = TCanvas->new("c2","Projection Canvas",710,10,700,500);
+    }
+    $c2->SetGrid();
+    $c2->cd();
+  
+    # draw slice corresponding to mouse position
+    my $biny = $h->GetYaxis()->FindBin($y);
+    my $hp = $h->ProjectionX("", $biny, $biny);
+    $hp->SetFillColor(38);
+    my $title = sprintf("Projection of biny=%d", $biny);
+    $hp->SetName("Projection");
+    $hp->SetTitle($title);
+    $hp->Fit("gaus", "ql");
+    $hp->GetFunction("gaus")->SetLineColor(kRed);
+    $hp->GetFunction("gaus")->SetLineWidth(6);
+    $c2->Update();
+    $padsav->cd();
+  }
+  
+  # Show the slice of a TH2 following the mouse position
+  sub DynamicSlice {
+    # Create a new canvas.
+    my $c1 = TCanvas->new("c1","Dynamic Slice Example",10,10,700,500)->keep;
+    $c1->SetFillColor(42);
+    $c1->SetFrameFillColor(33);
+    
+    # create a 2-d histogram, fill and draw it
+    my $hpxpy = TH2F->new("hpxpy","py vs px",40,-4,4,40,-4,4)->keep;
+    $hpxpy->SetStats(0);
+    foreach (1..50000) {
+      my ($px, $py) = $gRandom->Rannor();
+      $hpxpy->Fill($px, $py);
+    }
+    $hpxpy->Draw("col");
+     
+    # Add a TExec object to the canvas
+    $c1->AddExec("dynamic", sub {DynamicExec()});
+  }
+  
+
+
+
 =head2 draw2dopt.pl
 
   use strict;
@@ -539,7 +806,7 @@ This is a listing of all SOOT examples for Hist.
   
   $h1->Draw();
   $pad1->Update(); #this will force the generation of the "stats" box
-  my $ps1 = $h1->GetListOfFunctions()->FindObject("stats")->as('TPaveStats');
+  my $ps1 = $h1->GetListOfFunctions()->FindObject("stats");
   $ps1->SetX1NDC(0.4); 
   $ps1->SetX2NDC(0.6);
   $pad1->Modified();
@@ -559,7 +826,7 @@ This is a listing of all SOOT examples for Hist.
   $h2->Draw("sames");
   $pad2->Update();
   
-  my $ps2 = $h2->GetListOfFunctions()->FindObject("stats")->as('TPaveStats');
+  my $ps2 = $h2->GetListOfFunctions()->FindObject("stats");
   $ps2->SetX1NDC(0.65); 
   $ps2->SetX2NDC(0.85);
   $ps2->SetTextColor(kRed);

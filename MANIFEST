@@ -39,6 +39,7 @@ examples/Graph/gtime.pl
 examples/Graph/markerwarning.pl
 examples/Graph/motorcycle.pl
 examples/Graph/multigraph.pl
+examples/Hist/ContourList.pl
 examples/Hist/draw2dopt.pl
 examples/Hist/earth.pl
 examples/Hist/hksimple.pl
@@ -62,6 +63,7 @@ examples/Math/mathStudent.pl
 examples/Math/principal.pl
 examples/Math/rolke.pl
 examples/Math/vavilov.pl
+examples/Tree/simple.pl
 inc/inc_Alien-ROOT/Alien/ROOT.pm
 inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder.pm
 inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Base.pm
@@ -156,6 +158,7 @@ lib/SOOT/Examples/Graph.pod
 lib/SOOT/Examples/Hist.pod
 lib/SOOT/Examples/Images.pod
 lib/SOOT/Examples/Math.pod
+lib/SOOT/Examples/Tree.pod
 lib/SOOT/Struct.pm
 lib/TArray.pm
 lib/TObject.pm
@@ -166,12 +169,14 @@ META.yml
 perlobject.map
 ppport.h
 README
+root_simple_types.map
 ROOT_XSP/TArrayC.xsp
 ROOT_XSP/TArrayD.xsp
 ROOT_XSP/TArrayF.xsp
 ROOT_XSP/TArrayI.xsp
 ROOT_XSP/TArrayL.xsp
 ROOT_XSP/TArrayS.xsp
+ROOT_XSP/TExec.xsp
 ROOT_XSP/TF1.xsp
 ROOT_XSP/TFormula.xsp
 ROOT_XSP/TGraph.xsp
@@ -202,6 +207,9 @@ src/CPerlTypeConversion.h
 src/DataMemberAccess.cc
 src/DataMemberAccess.h
 src/ExternalXSUBs.h
+src/LinkDef.h
+src/PerlCallback.cc
+src/PerlCallback.h
 src/PerlCTypeConversion.cc
 src/PerlCTypeConversion.h
 src/PtrTable.cc
@@ -213,6 +221,8 @@ src/SOOTDebug.h
 src/SOOTTypes.cc
 src/SOOTTypes.h
 src/SOOTTypes.inline.h
+src/TExecImpl.cc
+src/TExecImpl.h
 src/TObjectEncapsulation.cc
 src/TObjectEncapsulation.h
 src/TObjectEncapsulation.inline.h
@@ -222,6 +232,8 @@ t/025cproto.t
 t/030tarray.t
 t/035equality.t
 t/045tf1.t
+t/055autocast.t
+t/065texec.t
 t/100Struct.t
 TODO
 typemap.xsp
@@ -232,3 +244,4 @@ XS/TObject.xs
 xt/800SimpleDraw.pl
 xt/900leak.t
 xt/manualCTest/test.cc
+META.json
