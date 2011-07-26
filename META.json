@@ -58,7 +58,7 @@
    "provides" : {
       "SOOT" : {
          "file" : "lib/SOOT.pm",
-         "version" : "0.14"
+         "version" : "0.15"
       },
       "SOOT::API" : {
          "file" : "lib/SOOT/API.pm",
@@ -89,5 +89,5 @@
          "url" : "git://github.com/tsee/SOOT.git"
       }
    },
-   "version" : "0.14"
+   "version" : "0.15"
 }

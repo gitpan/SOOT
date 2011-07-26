@@ -41,6 +41,7 @@ examples/Graph/motorcycle.pl
 examples/Graph/multigraph.pl
 examples/Hist/ContourList.pl
 examples/Hist/draw2dopt.pl
+examples/Hist/DynamicSlice.pl
 examples/Hist/earth.pl
 examples/Hist/hksimple.pl
 examples/Hist/hstack.pl
@@ -165,6 +166,7 @@ lib/TObject.pm
 LICENSE
 MANIFEST			This list of files
 MANIFEST.SKIP
+META.json
 META.yml
 perlobject.map
 ppport.h
@@ -184,6 +186,8 @@ ROOT_XSP/TGraphAsymmErrors.xsp
 ROOT_XSP/TGraphBentErrors.xsp
 ROOT_XSP/TGraphErrors.xsp
 ROOT_XSP/TH1.xsp
+ROOT_XSP/TPad.xsp
+ROOT_XSP/TRandom.xsp
 ROOT_XSP/TSystem.xsp
 ROOT_XSP/TTree.xsp
 ROOTIncludes.h
@@ -244,4 +248,3 @@ XS/TObject.xs
 xt/800SimpleDraw.pl
 xt/900leak.t
 xt/manualCTest/test.cc
-META.json
