@@ -3,7 +3,6 @@ buildtools/bundle.pl
 buildtools/gen_examples.pl
 buildtools/gen_root_xsp_include.pl
 buildtools/genconstants.pl
-buildtools/xsubpp
 Changes
 custom.map
 examples/Basic/analyze.pl
@@ -34,6 +33,8 @@ examples/Geometry/nucleus.pl
 examples/Geometry/shapes.pl
 examples/Graph/approx.pl
 examples/Graph/bent.pl
+examples/Graph/exclusiongraph.pl
+examples/Graph/exclusiongraph2.pl
 examples/Graph/graphApply.pl
 examples/Graph/gtime.pl
 examples/Graph/markerwarning.pl
@@ -43,8 +44,10 @@ examples/Hist/ContourList.pl
 examples/Hist/draw2dopt.pl
 examples/Hist/DynamicSlice.pl
 examples/Hist/earth.pl
+examples/Hist/fillrandom.pl
 examples/Hist/hksimple.pl
 examples/Hist/hstack.pl
+examples/Hist/hsum.pl
 examples/Hist/multicolor.pl
 examples/Hist/quantiles.pl
 examples/Hist/seism.pl
@@ -81,13 +84,20 @@ inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/Windows/GCC.pm
 inc/inc_ExtUtils-CBuilder/ExtUtils/CBuilder/Platform/Windows/MSVC.pm
 inc/inc_ExtUtils-CppGuess/ExtUtils/CppGuess.pm
 inc/inc_ExtUtils-ParseXS/ExtUtils/ParseXS.pm
+inc/inc_ExtUtils-ParseXS/ExtUtils/ParseXS/Constants.pm
+inc/inc_ExtUtils-ParseXS/ExtUtils/ParseXS/CountLines.pm
+inc/inc_ExtUtils-ParseXS/ExtUtils/ParseXS/Utilities.pm
+inc/inc_ExtUtils-ParseXS/ExtUtils/Typemaps.pm
+inc/inc_ExtUtils-ParseXS/ExtUtils/Typemaps/InputMap.pm
+inc/inc_ExtUtils-ParseXS/ExtUtils/Typemaps/OutputMap.pm
+inc/inc_ExtUtils-ParseXS/ExtUtils/Typemaps/Type.pm
+inc/inc_ExtUtils-ParseXS/ExtUtils/xsubpp
 inc/inc_ExtUtils-Typemap/ExtUtils/Typemap.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Cmd.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Driver.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Exception.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Exception/code.pm
-inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Exception/message.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Exception/object.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Exception/perlcode.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Exception/simple.pm
@@ -114,6 +124,7 @@ inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/Preprocessor.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/Raw.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Node/Type.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Parser.pm
+inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Plugin.pod
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Typemap.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Typemap/parsed.pm
 inc/inc_ExtUtils-XSpp/ExtUtils/XSpp/Typemap/reference.pm
@@ -162,6 +173,7 @@ lib/SOOT/Examples/Math.pod
 lib/SOOT/Examples/Tree.pod
 lib/SOOT/Struct.pm
 lib/TArray.pm
+lib/TClass.pm
 lib/TObject.pm
 LICENSE
 MANIFEST			This list of files
@@ -178,6 +190,8 @@ ROOT_XSP/TArrayF.xsp
 ROOT_XSP/TArrayI.xsp
 ROOT_XSP/TArrayL.xsp
 ROOT_XSP/TArrayS.xsp
+ROOT_XSP/TCanvas.xsp
+ROOT_XSP/TClass.xsp
 ROOT_XSP/TExec.xsp
 ROOT_XSP/TF1.xsp
 ROOT_XSP/TFormula.xsp

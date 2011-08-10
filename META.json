@@ -30,8 +30,7 @@
          "requires" : {
             "ExtUtils::CBuilder" : 0,
             "ExtUtils::Constant" : 0,
-            "ExtUtils::ParseXS" : 0,
-            "ExtUtils::Typemap" : "0.04",
+            "ExtUtils::ParseXS" : "3.02",
             "ExtUtils::XSpp" : "0.10_02",
             "File::Path" : 0,
             "File::Spec" : 0
@@ -58,7 +57,7 @@
    "provides" : {
       "SOOT" : {
          "file" : "lib/SOOT.pm",
-         "version" : "0.15"
+         "version" : "0.16"
       },
       "SOOT::API" : {
          "file" : "lib/SOOT/API.pm",
@@ -66,14 +65,6 @@
       },
       "SOOT::Struct" : {
          "file" : "lib/SOOT/Struct.pm",
-         "version" : 0
-      },
-      "TArray" : {
-         "file" : "lib/TArray.pm",
-         "version" : 0
-      },
-      "TObject" : {
-         "file" : "lib/TObject.pm",
          "version" : 0
       }
    },
@@ -89,5 +80,5 @@
          "url" : "git://github.com/tsee/SOOT.git"
       }
    },
-   "version" : "0.15"
+   "version" : "0.16"
 }
