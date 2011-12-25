@@ -37,7 +37,7 @@ This is a listing of all SOOT examples for Geometry.
   $geom->SetTopVolume($top);
   
   # Make the elementary assembly of the whole structure
-  my $tplate = TGeoVolumeAssembly->new("TOOTHPLATE");
+  my $tplate = TGeoVolumeAssembly->new("TOOTHPLATE"); # FIXME This segfaults!?
   
   my $ntooth = 5;
   my $xplate = 25.0;

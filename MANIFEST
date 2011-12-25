@@ -178,8 +178,6 @@ lib/TObject.pm
 LICENSE
 MANIFEST			This list of files
 MANIFEST.SKIP
-META.json
-META.yml
 perlobject.map
 ppport.h
 README
@@ -232,7 +230,6 @@ src/PerlCTypeConversion.cc
 src/PerlCTypeConversion.h
 src/PtrTable.cc
 src/PtrTable.h
-src/PtrTable.o.eN3bhB
 src/ROOTResolver.cc
 src/ROOTResolver.h
 src/SOOTDebug.h
@@ -260,5 +257,8 @@ XS/SOOTAPI.xs
 XS/SOOTBOOT.xs
 XS/TObject.xs
 xt/800SimpleDraw.pl
+xt/850examples_compile.t
 xt/900leak.t
 xt/manualCTest/test.cc
+META.yml
+META.json

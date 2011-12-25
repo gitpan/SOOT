@@ -353,57 +353,6 @@ This is a listing of all SOOT examples for Graph.
 
 
 
-=head2 graph2derrorsfit.pl
-
-  #!/usr/bin/env perl
-  use strict;
-  use warnings;
-  use SOOT qw/:all/;
-  
-  #Create, Draw and fit a TGraph2DErrors
-  #Author: Olivier Couet
-   
-  graph2derrorsfit();
-  $gApplication->Run();
-  
-  sub graph2derrorsfit {
-      my $c1 = TCanvas->new("c1")->keep;
-  
-      my ($ex, $ey, $ez);
-      my $e = 0.3;
-      my $nd = 500;
-  
-      my $f2 = TF2->new("f2","1000*(([0]*sin(x)/x)*([1]*sin(y)/y))+200",-6,6,-6,6)->keep;
-      $f2->SetParameters(1,1);
-      my $dte = TGraph2DErrors->new($nd)->keep;
-      die;
-  
-      # Fill the 2D graph
-      my $zmax = 0;
-      foreach my $i (0..$nd-1) {
-          my ($x, $y) = $f2->GetRandom2();      
-          my $rnd = $gRandom->Uniform(-$e,$e); # Generate a random number in [-e,e]
-          my $z = $f2->Eval($x,$y)*(1+$rnd);
-          $zmax = $z if $z > $zmax;
-          $dte->SetPoint($i,$x,$y,$z);
-          my $ex = 0.05*$gRandom->Rndm();
-          my $ey = 0.05*$gRandom->Rndm();
-          my $ez = TMath::Abs($z*$rnd);
-          $dte->SetPointError($i,$ex,$ey,$ez);
-      }
-  
-      $f2->SetParameters(0.5,1.5);
-      $dte->Fit($f2);
-      my $fit2 = $gROOT->FindObject("f2");
-      $fit2->SetTitle("Minuit fit result on the Graph2DErrors points");
-      $fit2->SetMaximum($zmax);
-      $gStyle->SetHistTopMargin(0); 
-      $fit2->Draw("surf1");
-      $dte->Draw("same p0");
-  }
-
-
-
 =head2 graphApply.pl
 
   use strict;
@@ -664,8 +613,9 @@ This is a listing of all SOOT examples for Graph.
   # for a simulated motorcycle accident, taken from Silverman (1985).
   
   # data taken from R library MASS: mcycle.txt
+  my $rootlib = Alien::ROOT->new->libdir;
   my $inFile = shift
-               || File::Spec->catfile($ENV{ROOTSYS},
+               || File::Spec->catfile($rootlib, '..', '..',
                                       qw(share doc root tutorials graphs motorcycle.dat));
   
   # read file and add to fit object

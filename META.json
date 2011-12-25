@@ -4,7 +4,7 @@
       "Steffen Mueller <smueller@cpan.org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.110930",
+   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.112621",
    "license" : [
       "open_source"
    ],
@@ -57,7 +57,7 @@
    "provides" : {
       "SOOT" : {
          "file" : "lib/SOOT.pm",
-         "version" : "0.16"
+         "version" : "0.17"
       },
       "SOOT::API" : {
          "file" : "lib/SOOT/API.pm",
@@ -80,5 +80,5 @@
          "url" : "git://github.com/tsee/SOOT.git"
       }
    },
-   "version" : "0.16"
+   "version" : "0.17"
 }
